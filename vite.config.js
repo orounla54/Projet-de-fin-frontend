@@ -21,11 +21,19 @@ export default defineConfig({
   build: {
     commonjsOptions: {
       transformMixedEsModules: true,
-    }
+    },
+    outDir: 'dist',
+    assetsDir: 'assets',
+    sourcemap: false
   },
   server: {
     proxy: {
-      '/api': 'http://localhost:5000'
+      '/api': {
+        target: process.env.VITE_BASE_URL_API || 'http://localhost:5000',
+        changeOrigin: true,
+        secure: false
+      }
     }
-  }
+  },
+  base: '/'
 })
