@@ -2,17 +2,21 @@ import axios from 'axios';
 
 // Configuration de base d'axios
 const axiosInstance = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_URL || '/api',
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
-  }
+  },
+  withCredentials: true
 });
 
 // Intercepteur pour les requêtes
 axiosInstance.interceptors.request.use(
   config => {
-    // Pour le moment, on ne gère pas les tokens
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
   },
   error => {
@@ -24,13 +28,11 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   response => response,
   error => {
-    console.error('Erreur Axios:', {
-      url: error.config?.url,
-      method: error.config?.method,
-      status: error.response?.status,
-      data: error.response?.data,
-      message: error.message
-    });
+    if (error.response?.status === 401) {
+      // Gérer l'expiration du token
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    }
     return Promise.reject(error);
   }
 );
