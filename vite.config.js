@@ -1,10 +1,6 @@
-import { fileURLToPath } from 'url'
-import { dirname, resolve } from 'path'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
+import path from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -14,7 +10,7 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@tailwindConfig': resolve(__dirname, 'tailwind.config.js'),
+      '@tailwindConfig': path.resolve(process.cwd(), 'tailwind.config.js'),
     },
   },
   optimizeDeps: {
