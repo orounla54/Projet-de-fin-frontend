@@ -7,8 +7,8 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "node --experimental-modules ./node_modules/vite/bin/vite.js build",
-    "build:prod": "node --experimental-modules ./node_modules/vite/bin/vite.js build",
+    "build": "npm ci && npx vite build",
+    "build:prod": "npm ci && npx vite build",
     "preview": "vite preview",
     "host": "vite --host"
   },
