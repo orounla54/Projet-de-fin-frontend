@@ -2,20 +2,42 @@ import axios from "axios";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../Auth/AuthContext";
-import API_ENDPOINTS from "../../config/api";
 import { baseURL } from "../DataFront/eventTypes";
 
 // Configuration axios
-axios.defaults.baseURL = baseURL;
-axios.interceptors.request.use(
+const axiosInstance = axios.create({
+    baseURL,
+    headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    }
+});
+
+// Intercepteur pour les requêtes
+axiosInstance.interceptors.request.use(
     config => {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('accessToken');
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
         return config;
     },
     error => {
+        return Promise.reject(error);
+    }
+);
+
+// Intercepteur pour les réponses
+axiosInstance.interceptors.response.use(
+    response => response,
+    error => {
+        console.error('Erreur Axios:', {
+            url: error.config?.url,
+            method: error.config?.method,
+            status: error.response?.status,
+            data: error.response?.data,
+            message: error.message
+        });
         return Promise.reject(error);
     }
 );
@@ -35,7 +57,7 @@ export const useGetData = (endpoint) => {
                 return;
             }
 
-            const response = await axios.get(endpoint);
+            const response = await axiosInstance.get(endpoint);
             setData(response.data);
             setError(null);
         } catch (error) {
@@ -45,7 +67,7 @@ export const useGetData = (endpoint) => {
                 navigate("/login");
             } else {
                 console.error("Erreur lors de la récupération des données :", error);
-                setError(error.response?.data?.message || "Une erreur est survenue");
+                setError(null);
             }
         } finally {
             setLoading(false);
@@ -70,7 +92,7 @@ export const usePostData = (endpoint) => {
     const postData = async (data) => {
         setLoading(true);
         try {
-            const res = await axios.post(endpoint, data);
+            const res = await axiosInstance.post(endpoint, data);
             setResponse(res.data);
             setError(null);
             return res.data;
@@ -81,7 +103,7 @@ export const usePostData = (endpoint) => {
                 navigate("/login");
             } else {
                 console.error("Erreur lors de l'envoi des données :", error);
-                setError(error.response?.data?.message || "Une erreur est survenue");
+                setError(null);
             }
             throw error;
         } finally {
@@ -103,7 +125,7 @@ export const usePutData = (endpoint) => {
     const putData = async (data) => {
         setLoading(true);
         try {
-            const res = await axios.put(endpoint, data);
+            const res = await axiosInstance.put(endpoint, data);
             setResponse(res.data);
             setError(null);
             return res.data;
@@ -114,7 +136,7 @@ export const usePutData = (endpoint) => {
                 navigate("/login");
             } else {
                 console.error("Erreur lors de la mise à jour des données :", error);
-                setError(error.response?.data?.message || "Une erreur est survenue");
+                setError(null);
             }
             throw error;
         } finally {
@@ -136,7 +158,7 @@ export const useDeleteData = (endpoint) => {
     const deleteData = async (id) => {
         setLoading(true);
         try {
-            const res = await axios.delete(`${endpoint}/${id}`);
+            const res = await axiosInstance.delete(`${endpoint}/${id}`);
             setResponse(res.data);
             setError(null);
             return res.data;
@@ -147,7 +169,7 @@ export const useDeleteData = (endpoint) => {
                 navigate("/login");
             } else {
                 console.error("Erreur lors de la suppression des données :", error);
-                setError(error.response?.data?.message || "Une erreur est survenue");
+                setError(null);
             }
             throw error;
         } finally {

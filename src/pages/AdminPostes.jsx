@@ -73,10 +73,7 @@ function AdminPostes() {
           setPostesCurrentInfo(response.data);
         }
       } catch (err) {
-        setErrorCurrent(
-          err.response?.data?.message ||
-            "Erreur inattendue lors de la récupération des données."
-        );
+        setErrorCurrent(null);
         console.error(err);
       } finally {
         setLoadingCurrent(false);

@@ -2,34 +2,27 @@ import axios from 'axios';
 import { baseURL } from '../DataFront/eventTypes';
 
 const AuthService = {
-    // Connexion de l'utilisateur (version temporaire sans vérification)
+    // Connexion de l'utilisateur
     login: async (data) => {
         try {
-            console.log('Connexion temporaire avec:', { email: data.email });
-            
-            // Création d'un utilisateur fictif
-            const mockUser = {
-                _id: 'temp-user-id',
+            console.log('Tentative de connexion avec:', { email: data.email });
+            const response = await axios.post(`${baseURL}/profiles/auth`, {
                 email: data.email,
-                nom: 'Utilisateur Test',
-                prenom: 'Test',
-                role: 'responsable',
-                isActive: true,
-                isValidate: true
-            };
-
-            // Création d'un token fictif
-            const mockToken = 'temp-token-' + Date.now();
-
-            // Stockage des données fictives
-            localStorage.setItem('accessToken', mockToken);
-            localStorage.setItem('user', JSON.stringify(mockUser));
+                password: data.password
+            });
             
-            console.log('Connexion temporaire réussie');
-            return { success: true, user: mockUser };
+            if (response.data.token) {
+                localStorage.setItem('accessToken', response.data.token);
+                localStorage.setItem('user', JSON.stringify(response.data.user));
+                return { success: true, user: response.data.user };
+            }
+            return { success: false, error: 'Réponse invalide du serveur' };
         } catch (error) {
-            console.error('Erreur de connexion temporaire:', error);
-            return { success: false, error: 'Erreur de connexion temporaire' };
+            console.error('Erreur de connexion:', error);
+            return { 
+                success: false, 
+                error: error.response?.data?.message || 'Erreur de connexion'
+            };
         }
     },
 
@@ -39,20 +32,25 @@ const AuthService = {
         localStorage.removeItem('user');
     },
 
-    // Vérification de l'authentification (version temporaire)
+    // Vérification de l'authentification
     checkAuth: async () => {
         try {
             const token = localStorage.getItem('accessToken');
-            const user = localStorage.getItem('user');
-            
-            if (!token || !user) {
+            if (!token) {
                 return { isAuthenticated: false };
             }
 
-            return { 
-                isAuthenticated: true, 
-                user: JSON.parse(user)
-            };
+            const response = await axios.get(`${baseURL}/profiles/me`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (response.data) {
+                return { 
+                    isAuthenticated: true, 
+                    user: response.data
+                };
+            }
+            return { isAuthenticated: false };
         } catch (error) {
             console.error('Erreur de vérification d\'authentification:', error);
             localStorage.removeItem('accessToken');
@@ -61,65 +59,60 @@ const AuthService = {
         }
     },
 
-    // Mise à jour du profil (version temporaire)
+    // Mise à jour du profil
     updateProfile: async (userData) => {
         try {
-            const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-            const updatedUser = { ...currentUser, ...userData };
-            localStorage.setItem('user', JSON.stringify(updatedUser));
-            return { success: true, user: updatedUser };
+            const token = localStorage.getItem('accessToken');
+            const response = await axios.put(`${baseURL}/profiles/me`, userData, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            return { success: true, user: response.data };
         } catch (error) {
             return { 
                 success: false, 
-                error: 'Erreur lors de la mise à jour du profil' 
+                error: error.response?.data?.message || 'Erreur lors de la mise à jour du profil'
             };
         }
     },
 
-    // Inscription (version temporaire)
+    // Inscription
     register: async (userData) => {
         try {
-            const mockUser = {
-                _id: 'temp-user-id-' + Date.now(),
-                ...userData,
-                isActive: true,
-                isValidate: true
-            };
-            return { success: true, data: mockUser };
+            const response = await axios.post(`${baseURL}/profiles/responsable/nouveau`, userData);
+            return { success: true, data: response.data };
         } catch (error) {
             return { 
                 success: false, 
-                error: 'Erreur lors de l\'inscription' 
+                error: error.response?.data?.message || 'Erreur lors de l\'inscription'
             };
         }
     },
 
-    // Validation du compte (version temporaire)
+    // Validation du compte
     validateAccount: async (email, code) => {
         try {
-            return { 
-                success: true, 
-                data: { message: 'Compte validé avec succès' } 
-            };
+            const response = await axios.post(`${baseURL}/profiles/validation`, {
+                email,
+                code
+            });
+            return { success: true, data: response.data };
         } catch (error) {
             return { 
                 success: false, 
-                error: 'Erreur lors de la validation du compte' 
+                error: error.response?.data?.message || 'Erreur lors de la validation du compte'
             };
         }
     },
 
-    // Réinitialisation du mot de passe (version temporaire)
+    // Réinitialisation du mot de passe
     resetPassword: async (email) => {
         try {
-            return { 
-                success: true, 
-                data: { message: 'Instructions de réinitialisation envoyées' } 
-            };
+            const response = await axios.post(`${baseURL}/profiles/request-reset`, { email });
+            return { success: true, data: response.data };
         } catch (error) {
             return { 
                 success: false, 
-                error: 'Erreur lors de la demande de réinitialisation' 
+                error: error.response?.data?.message || 'Erreur lors de la demande de réinitialisation'
             };
         }
     }

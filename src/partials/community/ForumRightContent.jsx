@@ -29,9 +29,7 @@ function ForumRightContent() {
       setErrorMessage(null);
     }
     if (error) {
-      setErrorMessage(
-        "Une erreur s'est produite lors du chargement des projets."
-      );
+      setErrorMessage(null);
     }
   }, [data, error]);
 

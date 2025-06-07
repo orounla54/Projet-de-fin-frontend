@@ -60,7 +60,7 @@ function ProjetsFiltre() {
 
   // Récupérer les données avec les paramètres de filtre conditionnels
   const { data, loading, error, fetchData } = useGetData(
-    queryParams ? `filter/projets?${queryParams}` : ""
+    queryParams ? `projets/filter?${queryParams}` : ""
   );
 
   // console.log(filter);
@@ -98,38 +98,21 @@ function ProjetsFiltre() {
 
   // Fonction pour supprimer les éléments sélectionnés
   const [deleteAllLoading, setDeleteAllLoading] = useState(false);
-  const deleteAll = async (selectedItems) => {
-    const token = AuthService.getAccessToken();
-    if (!token) {
-      console.error("Token non trouvé. Veuillez vous authentifier.");
-      return;
-    }
+  const { deleteData: deleteProjet } = useDeleteData('projets');
 
-    setDeleteAllLoading(true); // Mise à jour du statut de chargement
+  const deleteAll = async (selectedItems) => {
+    setDeleteAllLoading(true);
 
     try {
       const deleteResults = await Promise.all(
         selectedItems.map(async (id) => {
           try {
-            const response = await axios.delete(`${baseUrl}/projets/${id}`, {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            });
-            console.log(`Projet avec ID ${id} supprimé :`, response);
-            return { id, success: true }; // Retourner un résultat de suppression réussi
+            await deleteProjet(id);
+            console.log(`Projet avec ID ${id} supprimé`);
+            return { id, success: true };
           } catch (err) {
-            if (err.response && err.response.status === 404) {
-              console.warn(
-                `Projet avec ID ${id} déjà supprimé ou introuvable.`
-              );
-              return { id, success: true }; // Marque comme succès même si le projet est déjà supprimé
-            }
-            console.error(
-              `Erreur lors de la suppression du projet avec ID ${id}`,
-              err
-            );
-            return { id, success: false }; // Marque comme échec si une erreur autre que 404 survient
+            console.error(`Erreur lors de la suppression du projet avec ID ${id}:`, err);
+            return { id, success: false };
           }
         })
       );
@@ -139,17 +122,15 @@ function ProjetsFiltre() {
       console.log("Liste mise à jour avec succès après suppression");
 
       // Vider la liste des éléments sélectionnés après suppression
-      handleSelectedItems([]); // Mettre à jour le state pour réinitialiser la sélection
+      handleSelectedItems([]);
+      setSuccessMessage("Projets supprimés avec succès");
     } catch (error) {
-      console.error(
-        "Erreur lors de la suppression de certains éléments :",
-        error
-      );
-      setDeleteAllSuccess(false);
+      console.error("Erreur lors de la suppression de certains éléments :", error);
+      setError("Erreur lors de la suppression des projets");
     } finally {
-      setDeleteAllLoading(false); // S'assurer que le statut de chargement est mis à jour à la fin de l'opération
+      setDeleteAllLoading(false);
+      setIsCheck([]);
     }
-    setIsCheck([]);
   };
 
   //handleExport pour excel

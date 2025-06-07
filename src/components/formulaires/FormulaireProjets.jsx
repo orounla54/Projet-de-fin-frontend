@@ -1,18 +1,45 @@
 import React, { useEffect, useState } from "react";
-import { useForm, FormProvider, set } from "react-hook-form";
-import { usePostData, usePutData } from "../../utils/Requests/RequestService";
+import { useForm, FormProvider } from "react-hook-form";
+import { usePostData, usePutData, useGetData } from "../../utils/Requests/RequestService";
 import SpinnerLoading from "../SpinnerLoading";
 import { Link, useNavigate } from "react-router-dom";
 import { useSuccessMessage } from "../../utils/SuccessContext";
 
 function FormulaireProjets({ projet }) {
   const navigate = useNavigate();
-  //utilisation du contexte concernant le success message
   const { setSuccessMessage } = useSuccessMessage();
 
   const projetExiste = Object.keys(projet).length > 0;
 
-  //apprel de ma fonction post
+  // Récupération des postes pour la liste déroulante
+  const {
+    data: postes,
+    loading: postesLoading,
+    error: postesError,
+    getData: getPostes,
+  } = useGetData("postes");
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        await getPostes();
+        console.log("Postes chargés:", postes);
+      } catch (error) {
+        console.error("Erreur lors du chargement des données:", error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  // Log pour vérifier l'état des données
+  useEffect(() => {
+    console.log("État des données:", {
+      postes,
+      postesLoading,
+      postesError
+    });
+  }, [postes, postesLoading, postesError]);
+
   const {
     response: postResponse,
     error: postError,
@@ -20,7 +47,6 @@ function FormulaireProjets({ projet }) {
     postData,
   } = usePostData(`projets`);
 
-  //apprel de ma fonction update
   const {
     response: putResponse,
     error: putError,
@@ -30,73 +56,91 @@ function FormulaireProjets({ projet }) {
 
   const methods = useForm({
     defaultValues: {
-      libelle: projetExiste ? projet.libelle : "",
+      nom: projetExiste ? projet.nom : "",
       description: projetExiste ? projet.description : "",
-      datePriseDecision: projetExiste ? projet.datePriseDecision : "",
       dateDebut: projetExiste ? projet.dateDebut : "",
       dateFin: projetExiste ? projet.dateFin : "",
-      deadline: projetExiste ? projet.deadline : "",
+      budget: projetExiste ? projet.budget?.prevu || 0 : 0,
+      progression: projetExiste ? projet.progression : 0,
+      statut: projetExiste ? projet.statut : "planifie",
+      responsable: projetExiste ? projet.responsable : "",
     },
   });
 
   const { handleSubmit, control, setValue } = methods;
-  //charger les default value
+
   useEffect(() => {
     if (projetExiste) {
-      methods.setValue("libelle", projet.libelle);
+      methods.setValue("nom", projet.nom);
       methods.setValue("description", projet.description);
+      methods.setValue("budget", projet.budget);
+      methods.setValue("progression", projet.progression);
+      methods.setValue("statut", projet.statut);
+      methods.setValue("responsable", projet.responsable);
   
-      // Fonction utilitaire pour formater les dates
       const formatDate = (date) => {
         return date ? new Date(date).toISOString().split("T")[0] : "";
       };
   
-      // Appliquer le formatage pour chaque date
-      methods.setValue("datePriseDecision", formatDate(projet.datePriseDecision));
       methods.setValue("dateDebut", formatDate(projet.dateDebut));
       methods.setValue("dateFin", formatDate(projet.dateFin));
-      methods.setValue("deadline", formatDate(projet.deadline));
     }
   }, [projetExiste, projet, methods]);
-  
 
   const [msgError, setMsgError] = useState("");
 
-  // Met à jour les etats
-
-  const onSubmit =async (data) => {
+  const onSubmit = async (data) => {
     try {
-      const dateDataConvert = {
+      const formData = {
         ...data,
-        datePriseDecision: new Date(data.datePriseDecision), // Convertir en objet Date
-        dateDebut: new Date(data.dateDebut), // Convertir en objet Date
-        dateFin: new Date(data.dateFin), // Convertir en objet Date
-        deadline: new Date(data.deadline), // Convertir en objet Date
+        dateDebut: new Date(data.dateDebut),
+        dateFin: new Date(data.dateFin),
+        budget: Number(data.budget),
+        progression: Number(data.progression),
       };
-      console.log("Form Data:", dateDataConvert);
+
+      console.log("Données envoyées au serveur:", formData);
+      
       if (projetExiste) {
-       await putData(dateDataConvert);
-        setSuccessMessage("Projet modifiée avec succès 👌!");
-        console.log("put");
+        const response = await putData(formData);
+        console.log("Réponse du serveur (modification):", response);
+        if (response.error) {
+          throw new Error(response.error);
+        }
+        setSuccessMessage("Projet modifié avec succès 👌!");
       } else {
-        // // Appeler la fonction de votre hook avec les données du formulaire
-       await postData(dateDataConvert); // Assurez-vous que postData est la fonction fournie par le hook usePostData pour envoyer les données
-        setSuccessMessage("Projet enregistrée avec succès 👌!");
-        console.log("post");
+        const response = await postData(formData);
+        console.log("Réponse du serveur (création):", response);
+        if (response.error) {
+          throw new Error(response.error);
+        }
+        setSuccessMessage("Projet créé avec succès 👌!");
       }
-      // Rediriger l'utilisateur après la soumission
+
       if (!postLoading && !putLoading) {
         navigate(-1);
-      } // Retour à la page précédente
+      }
     } catch (error) {
-      console.error("Erreur lors de la soumission du formulaire:", error);
-      setMsgError("Erreur lors de la soumission du formulaire");
+      console.error("Erreur détaillée:", {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      setMsgError(
+        error.response?.data?.message || 
+        error.message || 
+        "Erreur lors de la soumission du formulaire"
+      );
     }
   };
 
+  if (postesLoading) {
+    return <SpinnerLoading />;
+  }
+
   return (
     <FormProvider {...methods}>
-      {postLoading || putLoading ? (
+      {postLoading || putLoading || postesLoading ? (
         <div className="flex items-center justify-center h-full w-full">
           <SpinnerLoading />
         </div>
@@ -121,62 +165,57 @@ function FormulaireProjets({ projet }) {
               Formulaire des Projets
             </h1>
 
-            {/* Libelle projet */}
+            {/* Nom du projet */}
             <div className="flex items-center justify-between gap-2 mb-5 flex-wrap">
               <div className="w-full relative">
                 <label
-                  htmlFor="libelle"
+                  htmlFor="nom"
                   className="block text-sm font-medium mb-1"
                 >
-                  Libelle <span className="text-red-500">*</span>
+                  Nom du projet <span className="text-red-500">*</span>
                 </label>
                 <input
-                  {...methods.register("libelle", {
-                    required: "Libelle est requis",
+                  {...methods.register("nom", {
+                    required: "Le nom du projet est requis",
                     maxLength: {
-                      value: 250, // Par exemple, 1000 caractères
-                      message: "Nombre de caractere trop grand",
+                      value: 250,
+                      message: "Le nom est trop long",
                     },
                   })}
                   className={`form-input w-full ${
-                    methods.formState.errors.libelle
-                      ? "border border-red-500"
-                      : ""
+                    methods.formState.errors.nom ? "border border-red-500" : ""
                   }`}
                   type="text"
-                  placeholder="Libelle de projet"
-                  defaultValue={projet.libelle}
+                  placeholder="Nom du projet"
                 />
-                {methods.formState.errors.libelle && (
+                {methods.formState.errors.nom && (
                   <p className="text-red-500 text-xs absolute -bottom-5 left-0">
-                    {methods.formState.errors.libelle.message}
+                    {methods.formState.errors.nom.message}
                   </p>
                 )}
               </div>
             </div>
 
-            {/* description  projet */}
+            {/* Description */}
             <div className="relative mb-5">
               <label
                 htmlFor="description"
                 className="block text-sm font-medium mb-1"
               >
-                Description
+                Description <span className="text-red-500">*</span>
               </label>
               <textarea
                 {...methods.register("description", {
+                  required: "La description est requise",
                   maxLength: {
-                    value: 2500, // Par exemple, 1000 caractères
-                    message: "Nombre de caractere trop grand",
+                    value: 2500,
+                    message: "La description est trop longue",
                   },
                 })}
                 className={`form-input w-full ${
-                  methods.formState.errors.description
-                    ? "border border-red-500"
-                    : ""
+                  methods.formState.errors.description ? "border border-red-500" : ""
                 }`}
                 placeholder="Description du projet"
-                defaultValue={projet.description}
               />
               {methods.formState.errors.description && (
                 <p className="text-red-500 text-xs sm:-bottom-9 left-0 md:-bottom-5 absolute">
@@ -185,55 +224,92 @@ function FormulaireProjets({ projet }) {
               )}
             </div>
 
-            {/* Dates */}
+            {/* Budget et Progression */}
             <div className="grid gap-4 md:grid-cols-2 mb-5">
-              {/* Datepicker pour la plage de dates */}
-
               <div>
                 <label
-                  htmlFor="datePriseDecision"
-                  className="block text-sm font-medium mb-1 md:text-xs"
+                  htmlFor="budget"
+                  className="block text-sm font-medium mb-1"
                 >
-                  Date de prise de décision
+                  Budget <span className="text-red-500">*</span>
                 </label>
                 <input
-                  {...methods.register("datePriseDecision")}
-                  type="date"
-                  className="form-input w-full"
+                  {...methods.register("budget", {
+                    required: "Le budget est requis",
+                    min: {
+                      value: 0,
+                      message: "Le budget doit être positif",
+                    },
+                  })}
+                  type="number"
+                  className={`form-input w-full ${
+                    methods.formState.errors.budget ? "border border-red-500" : ""
+                  }`}
+                  placeholder="Budget du projet"
                 />
+                {methods.formState.errors.budget && (
+                  <p className="text-red-500 text-xs absolute -bottom-5 left-0">
+                    {methods.formState.errors.budget.message}
+                  </p>
+                )}
               </div>
 
               <div>
                 <label
-                  htmlFor="deadline"
+                  htmlFor="progression"
                   className="block text-sm font-medium mb-1"
                 >
-                  Deadline
+                  Progression (%) <span className="text-red-500">*</span>
                 </label>
                 <input
-                  {...methods.register("deadline")}
-                  type="date"
-                  className="form-input w-full"
+                  {...methods.register("progression", {
+                    required: "La progression est requise",
+                    min: {
+                      value: 0,
+                      message: "La progression doit être entre 0 et 100",
+                    },
+                    max: {
+                      value: 100,
+                      message: "La progression doit être entre 0 et 100",
+                    },
+                  })}
+                  type="number"
+                  className={`form-input w-full ${
+                    methods.formState.errors.progression ? "border border-red-500" : ""
+                  }`}
+                  placeholder="Progression du projet"
                 />
+                {methods.formState.errors.progression && (
+                  <p className="text-red-500 text-xs absolute -bottom-5 left-0">
+                    {methods.formState.errors.progression.message}
+                  </p>
+                )}
               </div>
             </div>
 
             {/* Dates */}
             <div className="grid gap-4 md:grid-cols-2 mb-5">
-              {/* Datepicker pour la plage de dates */}
-
               <div>
                 <label
                   htmlFor="dateDebut"
                   className="block text-sm font-medium mb-1"
                 >
-                  Date du debut
+                  Date de début <span className="text-red-500">*</span>
                 </label>
                 <input
-                  {...methods.register("dateDebut")}
+                  {...methods.register("dateDebut", {
+                    required: "La date de début est requise",
+                  })}
                   type="date"
-                  className="form-input w-full"
+                  className={`form-input w-full ${
+                    methods.formState.errors.dateDebut ? "border border-red-500" : ""
+                  }`}
                 />
+                {methods.formState.errors.dateDebut && (
+                  <p className="text-red-500 text-xs absolute -bottom-5 left-0">
+                    {methods.formState.errors.dateDebut.message}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -241,23 +317,107 @@ function FormulaireProjets({ projet }) {
                   htmlFor="dateFin"
                   className="block text-sm font-medium mb-1"
                 >
-                  Date de fin
+                  Date de fin <span className="text-red-500">*</span>
                 </label>
                 <input
-                  {...methods.register("dateFin")}
+                  {...methods.register("dateFin", {
+                    required: "La date de fin est requise",
+                  })}
                   type="date"
-                  className="form-input w-full"
+                  className={`form-input w-full ${
+                    methods.formState.errors.dateFin ? "border border-red-500" : ""
+                  }`}
                 />
+                {methods.formState.errors.dateFin && (
+                  <p className="text-red-500 text-xs absolute -bottom-5 left-0">
+                    {methods.formState.errors.dateFin.message}
+                  </p>
+                )}
               </div>
             </div>
 
-            {/* bouton de validadion */}
-            <button
-              type="submit"
-              className="mt-4 px-6 py-1.5 bg-violet-500 hover:bg-violet-600 transition-colors duration-300 text-white font-bold rounded-lg"
-            >
-              {projetExiste ? "Modifier" : "Valider"}
-            </button>
+            {/* Responsable */}
+            <div className="mb-5">
+              <label
+                htmlFor="responsable"
+                className="block text-sm font-medium mb-1"
+              >
+                Responsable <span className="text-red-500">*</span>
+              </label>
+              <select
+                {...methods.register("responsable", {
+                  required: "Le responsable est requis",
+                })}
+                className={`form-select w-full ${
+                  methods.formState.errors.responsable ? "border border-red-500" : ""
+                }`}
+              >
+                <option value="">Sélectionner un responsable</option>
+                {Array.isArray(postes) && postes.length > 0 ? (
+                  postes.map((poste) => (
+                    <option key={poste._id} value={poste._id}>
+                      {poste.nom}
+                    </option>
+                  ))
+                ) : (
+                  <option value="" disabled>
+                    Aucun poste disponible
+                  </option>
+                )}
+              </select>
+              {methods.formState.errors.responsable && (
+                <p className="text-red-500 text-xs absolute -bottom-5 left-0">
+                  {methods.formState.errors.responsable.message}
+                </p>
+              )}
+              {postesError && (
+                <p className="text-red-500 text-xs mt-1">
+                  Erreur lors du chargement des postes
+                </p>
+              )}
+            </div>
+
+            {/* Statut */}
+            <div className="mb-5">
+              <label
+                htmlFor="statut"
+                className="block text-sm font-medium mb-1"
+              >
+                Statut <span className="text-red-500">*</span>
+              </label>
+              <select
+                {...methods.register("statut", {
+                  required: "Le statut est requis",
+                })}
+                className={`form-select w-full ${
+                  methods.formState.errors.statut ? "border border-red-500" : ""
+                }`}
+              >
+                <option value="planifie">Planifié</option>
+                <option value="en_cours">En cours</option>
+                <option value="termine">Terminé</option>
+                <option value="annule">Annulé</option>
+              </select>
+              {methods.formState.errors.statut && (
+                <p className="text-red-500 text-xs absolute -bottom-5 left-0">
+                  {methods.formState.errors.statut.message}
+                </p>
+              )}
+            </div>
+
+            {/* Bouton de soumission */}
+            <div className="flex justify-end mt-6">
+              <button
+                type="submit"
+                className="btn bg-indigo-500 hover:bg-indigo-600 text-white"
+              >
+                {projetExiste ? "Modifier" : "Créer"} le projet
+              </button>
+            </div>
+
+            {msgError && (
+              <div className="text-red-500 text-sm mt-2">{msgError}</div>
+            )}
           </div>
         </form>
       )}
