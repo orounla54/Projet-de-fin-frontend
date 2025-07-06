@@ -26,7 +26,7 @@ function DangerModal(props) {
         setEndpoint("taches");
         break;
       case "typesTaches":
-        setEndpoint("typesTaches");
+        setEndpoint("filter/typesTaches");
         break;
       case "observations":
         setEndpoint("observations");

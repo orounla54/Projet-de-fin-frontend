@@ -17,9 +17,10 @@
     "@tailwindcss/forms": "^0.5.7",
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.16",
-    "axios": "^1.9.0",
+    "axios": "^1.10.0",
     "chart.js": "^4.4.7",
     "chartjs-adapter-moment": "^1.0.1",
+    "core-js-pure": "^3.43.0",
     "digital-brics": "file:",
     "dotenv": "^16.4.7",
     "file-saver": "^2.0.5",
@@ -42,6 +43,5 @@
     "tailwindcss": "^3.3.6",
     "vite": "^5.0.6",
     "xlsx": "^0.18.5"
-  },
-  "devDependencies": {}
+  }
 }

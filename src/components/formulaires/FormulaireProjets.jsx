@@ -11,19 +11,28 @@ function FormulaireProjets({ projet }) {
 
   const projetExiste = Object.keys(projet).length > 0;
 
-  // Récupération des postes pour la liste déroulante
+  // Récupération des utilisateurs pour la liste déroulante des responsables
   const {
-    data: postes,
-    loading: postesLoading,
-    error: postesError,
-    getData: getPostes,
-  } = useGetData("postes");
+    data: users,
+    loading: usersLoading,
+    error: usersError,
+    fetchData: fetchUsers,
+  } = useGetData("/api/users/actifs");
+
+  // Récupération des services
+  const {
+    data: services,
+    loading: servicesLoading,
+    error: servicesError,
+    fetchData: fetchServices,
+  } = useGetData("/api/services/forUpdate");
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        await getPostes();
-        console.log("Postes chargés:", postes);
+        await fetchUsers();
+        await fetchServices();
+        console.log("Données chargées:", { users, services });
       } catch (error) {
         console.error("Erreur lors du chargement des données:", error);
       }
@@ -34,36 +43,39 @@ function FormulaireProjets({ projet }) {
   // Log pour vérifier l'état des données
   useEffect(() => {
     console.log("État des données:", {
-      postes,
-      postesLoading,
-      postesError
+      users,
+      usersLoading,
+      usersError,
+      services,
+      servicesLoading,
+      servicesError
     });
-  }, [postes, postesLoading, postesError]);
+  }, [users, usersLoading, usersError, services, servicesLoading, servicesError]);
 
   const {
     response: postResponse,
     error: postError,
     loading: postLoading,
     postData,
-  } = usePostData(`projets`);
+  } = usePostData(`/api/projets/public`);
 
   const {
     response: putResponse,
     error: putError,
     loading: putLoading,
     putData,
-  } = usePutData(`projets/${projet.id}`);
+  } = usePutData(`/api/projets/${projet.id}`);
 
   const methods = useForm({
     defaultValues: {
-      nom: projetExiste ? projet.nom : "",
+      titre: projetExiste ? projet.titre : "",
       description: projetExiste ? projet.description : "",
       dateDebut: projetExiste ? projet.dateDebut : "",
       dateFin: projetExiste ? projet.dateFin : "",
       budget: projetExiste ? projet.budget?.prevu || 0 : 0,
-      progression: projetExiste ? projet.progression : 0,
-      statut: projetExiste ? projet.statut : "planifie",
+      statut: projetExiste ? projet.statut : "planifié",
       responsable: projetExiste ? projet.responsable : "",
+      service: projetExiste ? projet.service : "",
     },
   });
 
@@ -71,12 +83,12 @@ function FormulaireProjets({ projet }) {
 
   useEffect(() => {
     if (projetExiste) {
-      methods.setValue("nom", projet.nom);
+      methods.setValue("titre", projet.titre);
       methods.setValue("description", projet.description);
-      methods.setValue("budget", projet.budget);
-      methods.setValue("progression", projet.progression);
+      methods.setValue("budget", projet.budget?.prevu || 0);
       methods.setValue("statut", projet.statut);
       methods.setValue("responsable", projet.responsable);
+      methods.setValue("service", projet.service);
   
       const formatDate = (date) => {
         return date ? new Date(date).toISOString().split("T")[0] : "";
@@ -92,11 +104,17 @@ function FormulaireProjets({ projet }) {
   const onSubmit = async (data) => {
     try {
       const formData = {
-        ...data,
+        titre: data.titre,
+        description: data.description,
         dateDebut: new Date(data.dateDebut),
         dateFin: new Date(data.dateFin),
-        budget: Number(data.budget),
-        progression: Number(data.progression),
+        budget: {
+          prevu: Number(data.budget),
+          devise: 'EUR'
+        },
+        statut: data.statut,
+        responsable: data.responsable,
+        service: data.service,
       };
 
       console.log("Données envoyées au serveur:", formData);
@@ -134,13 +152,13 @@ function FormulaireProjets({ projet }) {
     }
   };
 
-  if (postesLoading) {
+  if (usersLoading || servicesLoading) {
     return <SpinnerLoading />;
   }
 
   return (
     <FormProvider {...methods}>
-      {postLoading || putLoading || postesLoading ? (
+      {postLoading || putLoading || usersLoading || servicesLoading ? (
         <div className="flex items-center justify-center h-full w-full">
           <SpinnerLoading />
         </div>
@@ -165,32 +183,32 @@ function FormulaireProjets({ projet }) {
               Formulaire des Projets
             </h1>
 
-            {/* Nom du projet */}
+            {/* Titre du projet */}
             <div className="flex items-center justify-between gap-2 mb-5 flex-wrap">
               <div className="w-full relative">
                 <label
-                  htmlFor="nom"
+                  htmlFor="titre"
                   className="block text-sm font-medium mb-1"
                 >
-                  Nom du projet <span className="text-red-500">*</span>
+                  Titre du projet <span className="text-red-500">*</span>
                 </label>
                 <input
-                  {...methods.register("nom", {
-                    required: "Le nom du projet est requis",
+                  {...methods.register("titre", {
+                    required: "Le titre du projet est requis",
                     maxLength: {
                       value: 250,
-                      message: "Le nom est trop long",
+                      message: "Le titre est trop long",
                     },
                   })}
                   className={`form-input w-full ${
-                    methods.formState.errors.nom ? "border border-red-500" : ""
+                    methods.formState.errors.titre ? "border border-red-500" : ""
                   }`}
                   type="text"
-                  placeholder="Nom du projet"
+                  placeholder="Titre du projet"
                 />
-                {methods.formState.errors.nom && (
+                {methods.formState.errors.titre && (
                   <p className="text-red-500 text-xs absolute -bottom-5 left-0">
-                    {methods.formState.errors.nom.message}
+                    {methods.formState.errors.titre.message}
                   </p>
                 )}
               </div>
@@ -224,67 +242,33 @@ function FormulaireProjets({ projet }) {
               )}
             </div>
 
-            {/* Budget et Progression */}
-            <div className="grid gap-4 md:grid-cols-2 mb-5">
-              <div>
-                <label
-                  htmlFor="budget"
-                  className="block text-sm font-medium mb-1"
-                >
-                  Budget <span className="text-red-500">*</span>
-                </label>
-                <input
-                  {...methods.register("budget", {
-                    required: "Le budget est requis",
-                    min: {
-                      value: 0,
-                      message: "Le budget doit être positif",
-                    },
-                  })}
-                  type="number"
-                  className={`form-input w-full ${
-                    methods.formState.errors.budget ? "border border-red-500" : ""
-                  }`}
-                  placeholder="Budget du projet"
-                />
-                {methods.formState.errors.budget && (
-                  <p className="text-red-500 text-xs absolute -bottom-5 left-0">
-                    {methods.formState.errors.budget.message}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label
-                  htmlFor="progression"
-                  className="block text-sm font-medium mb-1"
-                >
-                  Progression (%) <span className="text-red-500">*</span>
-                </label>
-                <input
-                  {...methods.register("progression", {
-                    required: "La progression est requise",
-                    min: {
-                      value: 0,
-                      message: "La progression doit être entre 0 et 100",
-                    },
-                    max: {
-                      value: 100,
-                      message: "La progression doit être entre 0 et 100",
-                    },
-                  })}
-                  type="number"
-                  className={`form-input w-full ${
-                    methods.formState.errors.progression ? "border border-red-500" : ""
-                  }`}
-                  placeholder="Progression du projet"
-                />
-                {methods.formState.errors.progression && (
-                  <p className="text-red-500 text-xs absolute -bottom-5 left-0">
-                    {methods.formState.errors.progression.message}
-                  </p>
-                )}
-              </div>
+            {/* Budget */}
+            <div className="mb-5">
+              <label
+                htmlFor="budget"
+                className="block text-sm font-medium mb-1"
+              >
+                Budget prévu <span className="text-red-500">*</span>
+              </label>
+              <input
+                {...methods.register("budget", {
+                  required: "Le budget est requis",
+                  min: {
+                    value: 0,
+                    message: "Le budget doit être positif",
+                  },
+                })}
+                type="number"
+                className={`form-input w-full ${
+                  methods.formState.errors.budget ? "border border-red-500" : ""
+                }`}
+                placeholder="Budget du projet"
+              />
+              {methods.formState.errors.budget && (
+                <p className="text-red-500 text-xs absolute -bottom-5 left-0">
+                  {methods.formState.errors.budget.message}
+                </p>
+              )}
             </div>
 
             {/* Dates */}
@@ -336,6 +320,47 @@ function FormulaireProjets({ projet }) {
               </div>
             </div>
 
+            {/* Service */}
+            <div className="mb-5">
+              <label
+                htmlFor="service"
+                className="block text-sm font-medium mb-1"
+              >
+                Service <span className="text-red-500">*</span>
+              </label>
+              <select
+                {...methods.register("service", {
+                  required: "Le service est requis",
+                })}
+                className={`form-select w-full ${
+                  methods.formState.errors.service ? "border border-red-500" : ""
+                }`}
+              >
+                <option value="">Sélectionner un service</option>
+                {Array.isArray(services) && services.length > 0 ? (
+                  services.map((service) => (
+                    <option key={service._id || service.id} value={service._id || service.id}>
+                      {service.nom}
+                    </option>
+                  ))
+                ) : (
+                  <option value="" disabled>
+                    Aucun service disponible
+                  </option>
+                )}
+              </select>
+              {methods.formState.errors.service && (
+                <p className="text-red-500 text-xs absolute -bottom-5 left-0">
+                  {methods.formState.errors.service.message}
+                </p>
+              )}
+              {servicesError && (
+                <p className="text-red-500 text-xs mt-1">
+                  Erreur lors du chargement des services
+                </p>
+              )}
+            </div>
+
             {/* Responsable */}
             <div className="mb-5">
               <label
@@ -353,15 +378,15 @@ function FormulaireProjets({ projet }) {
                 }`}
               >
                 <option value="">Sélectionner un responsable</option>
-                {Array.isArray(postes) && postes.length > 0 ? (
-                  postes.map((poste) => (
-                    <option key={poste._id} value={poste._id}>
-                      {poste.nom}
+                {Array.isArray(users) && users.length > 0 ? (
+                  users.map((user) => (
+                    <option key={user._id || user.id} value={user._id || user.id}>
+                      {user.nom} {user.prenom}
                     </option>
                   ))
                 ) : (
                   <option value="" disabled>
-                    Aucun poste disponible
+                    Aucun utilisateur disponible
                   </option>
                 )}
               </select>
@@ -370,9 +395,9 @@ function FormulaireProjets({ projet }) {
                   {methods.formState.errors.responsable.message}
                 </p>
               )}
-              {postesError && (
+              {usersError && (
                 <p className="text-red-500 text-xs mt-1">
-                  Erreur lors du chargement des postes
+                  Erreur lors du chargement des utilisateurs
                 </p>
               )}
             </div>
@@ -393,10 +418,11 @@ function FormulaireProjets({ projet }) {
                   methods.formState.errors.statut ? "border border-red-500" : ""
                 }`}
               >
-                <option value="planifie">Planifié</option>
-                <option value="en_cours">En cours</option>
-                <option value="termine">Terminé</option>
-                <option value="annule">Annulé</option>
+                <option value="planifié">Planifié</option>
+                <option value="en cours">En cours</option>
+                <option value="terminé">Terminé</option>
+                <option value="suspendu">Suspendu</option>
+                <option value="annulé">Annulé</option>
               </select>
               {methods.formState.errors.statut && (
                 <p className="text-red-500 text-xs absolute -bottom-5 left-0">

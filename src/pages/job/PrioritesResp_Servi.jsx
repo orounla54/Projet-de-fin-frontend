@@ -39,7 +39,7 @@ function PrioritesResp_Servi({ endpoint }) {
   } = useGetData(
     endpoint === "priorites/service"
       ? "service/responsables/log"
-      : "responsables/log"
+      : null
   );
 
   const { data, loading, error, fetchData } = useGetData(

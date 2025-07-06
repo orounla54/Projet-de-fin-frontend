@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { publicAxiosInstance } from "../utils/axiosConfig";
 import axiosInstance from "../utils/axiosConfig";
 import ModalBlank from "../components/ModalBlank";
 import { useAuth } from "../utils/Auth/AuthContext";
@@ -11,17 +12,15 @@ function NewResponsable_Profile() {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
 
-  // Redirection si déjà authentifié
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate("/");
-    }
-  }, [isAuthenticated, navigate]);
+  // Suppression de la redirection automatique
+  // useEffect(() => {
+  //   if (isAuthenticated) {
+  //     navigate("/");
+  //   }
+  // }, [isAuthenticated, navigate]);
 
   const [infoModalOpen, setInfoModalOpen] = useState(true);
   const [responsableAddId, setResponsableAddId] = useState(null);
-  const [loadingCurrent, setLoadingCurrent] = useState(false);
-  const [errorCurrent, setErrorCurrent] = useState(null);
 
   // Initialisation des états avec des tableaux vides
   const [services, setServices] = useState([]);
@@ -36,23 +35,21 @@ function NewResponsable_Profile() {
   const [loading, setLoading] = useState(false);
   const [messageR, setMessage] = useState("");
 
+  // Réactivation du chargement des données depuis le backend
   useEffect(() => {
     const fetchDetails = async () => {
-      setLoadingCurrent(true);
-      setErrorCurrent(null);
-
       try {
         console.log('Début de la récupération des données...');
         console.log('URLs des requêtes:', {
-          services: '/services',
-          postes: '/postes',
-          positions: '/positions'
+          services: '/services/public',
+          postes: '/postes/public',
+          positions: '/positions/public'
         });
 
         const [responseS, responsePs, responsePst] = await Promise.all([
-          axiosInstance.get('/services'),
-          axiosInstance.get('/postes'),
-          axiosInstance.get('/positions')
+          publicAxiosInstance.get('/services/public'),
+          publicAxiosInstance.get('/postes/public'),
+          publicAxiosInstance.get('/positions/public')
         ]);
 
         console.log('Réponses reçues:', {
@@ -61,23 +58,23 @@ function NewResponsable_Profile() {
           positions: responsePst.data
         });
 
-        if (responseS.data && Array.isArray(responseS.data)) {
-          console.log('Services valides reçus:', responseS.data.length);
-          setServices(responseS.data);
+        if (responseS.data && Array.isArray(responseS.data.data)) {
+          console.log('Services valides reçus:', responseS.data.data.length);
+          setServices(responseS.data.data);
         } else {
           console.warn('Format de données services invalide:', responseS.data);
         }
 
-        if (responsePs.data && Array.isArray(responsePs.data)) {
-          console.log('Postes valides reçus:', responsePs.data.length);
-          setPostes(responsePs.data);
+        if (responsePs.data && Array.isArray(responsePs.data.data)) {
+          console.log('Postes valides reçus:', responsePs.data.data.length);
+          setPostes(responsePs.data.data);
         } else {
           console.warn('Format de données postes invalide:', responsePs.data);
         }
 
-        if (responsePst.data && Array.isArray(responsePst.data)) {
-          console.log('Positions valides reçues:', responsePst.data.length);
-          setPositions(responsePst.data);
+        if (responsePst.data && Array.isArray(responsePst.data.data)) {
+          console.log('Positions valides reçues:', responsePst.data.data.length);
+          setPositions(responsePst.data.data);
         } else {
           console.warn('Format de données positions invalide:', responsePst.data);
         }
@@ -88,16 +85,10 @@ function NewResponsable_Profile() {
           status: err.response?.status,
           url: err.config?.url
         });
-        setErrorCurrent(
-          err.response?.data?.message ||
-            "Erreur inattendue lors de la récupération des données."
-        );
         // Initialiser avec des tableaux vides en cas d'erreur
         setServices([]);
         setPostes([]);
         setPositions([]);
-      } finally {
-        setLoadingCurrent(false);
       }
     };
 
@@ -117,24 +108,26 @@ function NewResponsable_Profile() {
     try {
       setLoading(true);
       setMsgErr(""); // Réinitialiser les erreurs
-      const response = await axiosInstance.post('/responsables/nouveau', data);
+      const response = await publicAxiosInstance.post('/users/responsable/nouveau', data);
       if (response.status === 200 || response.status === 201) {
         const { responsableId, message } = response.data;
         setMessage(message);
         setResponsableAddId(responsableId);
         setResponsableAdd(true); // Activer l'étape suivante
         setInfoModalOpen(true); // Ouvrir le modal
+        // Rediriger vers la page de connexion après 2 secondes
+        setTimeout(() => {
+          navigate('/login', { state: { inscriptionSuccess: true } });
+        }, 2000);
       }
     } catch (error) {
       console.error('Erreur lors de l\'inscription:', error);
       
-      // Gérer les erreurs de validation ou de duplication
       if (error.response?.status === 400) {
         const errorMessage = error.response.data.message;
         if (errorMessage.includes('email existe déjà')) {
           setMsgErr("Cette adresse email est déjà utilisée. Veuillez en utiliser une autre.");
         } else if (error.response.data.errors) {
-          // Afficher les erreurs de validation
           setMsgErr(error.response.data.errors.join(', '));
         } else {
           setMsgErr(errorMessage);
@@ -147,48 +140,10 @@ function NewResponsable_Profile() {
     }
   };
 
-  const onSubmitLogin = async (data) => {
-    try {
-      setLoading(true);
-      setMsgErr(""); // Réinitialiser les erreurs
-      const response = await axiosInstance.post(`/profiles/nouveau/${responsableAddId}`, {
-        email: data.login,
-        password: data.password,
-        nom: data.nom,
-        prenom: data.prenom
-      });
-      if (response.status === 200 || response.status === 201) {
-        const { message, code, user } = response.data;
-        setLoginAdd(true);
-        setMessage(message);
-        setCode(code);
-        setInfoModalOpen(true);
-        // Stocker l'ID de l'utilisateur pour la validation
-        if (user && user.id) {
-          setResponsableAddId(user.id);
-        }
-      }
-    } catch (error) {
-      console.error('Erreur lors de l\'ajout du login:', error);
-      setMsgErr(
-        error?.response?.data?.message || "Erreur lors de l'ajout du login."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
   console.log('Services state:', services);
 
   return (
     <main className="relative bg-white dark:bg-gray-900">
-      {loadingCurrent ? (
-        <div className="absolute z-40 flex items-center justify-center w-full h-full bg-white dark:bg-gray-900">
-          <SpinnerLoading />
-        </div>
-      ) : (
-        <></>
-      )}
       <div className="relative md:flex">
         {/* Content */}
         <div className="md:w-1/2">
@@ -284,6 +239,30 @@ function NewResponsable_Profile() {
                       </div>
 
                       <div>
+                        <label htmlFor="password" className="block mb-1 text-sm font-medium">
+                          Mot de passe <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          id="password"
+                          type="password"
+                          placeholder="Entrez votre mot de passe"
+                          className={`form-input w-full ${errors.password ? "border border-red-500" : ""}`}
+                          {...register("password", { 
+                            required: "Le mot de passe est requis",
+                            minLength: {
+                              value: 8,
+                              message: "Le mot de passe doit contenir au moins 8 caractères"
+                            }
+                          })}
+                        />
+                        {errors.password && (
+                          <span className="text-xs text-red-500">
+                            {errors.password.message}
+                          </span>
+                        )}
+                      </div>
+
+                      <div>
                         <label htmlFor="departement" className="block mb-1 text-sm font-medium">
                           Département <span className="text-red-500">*</span>
                         </label>
@@ -295,27 +274,6 @@ function NewResponsable_Profile() {
                         />
                         {errors.departement && (
                           <span className="text-xs text-red-500">Le département est requis</span>
-                        )}
-                      </div>
-
-                      {/* poste */}
-                      <div>
-                        <label
-                          className="block mb-1 text-sm font-medium "
-                          htmlFor="poste"
-                        >
-                          Poste<span className="text-gray-500"> *</span>
-                        </label>
-                        <input
-                          id="poste"
-                          placeholder="Entrez votre poste"
-                          className="w-full form-input"
-                          {...register("poste", { required: false })}
-                        />
-                        {errors.poste && (
-                          <span className="text-xs text-red-500">
-                            Le poste est requis
-                          </span>
                         )}
                       </div>
 
@@ -338,7 +296,7 @@ function NewResponsable_Profile() {
                             <option value="">Sélectionnez...</option>
                             {services.map((service) => (
                               <option key={service._id} value={service._id}>
-                                {service.libelle}
+                                {service.nom}
                               </option>
                             ))}
                           </select>
@@ -366,7 +324,7 @@ function NewResponsable_Profile() {
                             <option value="">Sélectionnez...</option>
                             {postes.map((poste) => (
                               <option key={poste._id} value={poste._id}>
-                                {poste.libelle}
+                                {poste.nom}
                               </option>
                             ))}
                           </select>
@@ -397,7 +355,7 @@ function NewResponsable_Profile() {
                                 key={position._id}
                                 value={position._id}
                               >
-                                {position.libelle}
+                                {position.nom}
                               </option>
                             ))}
                           </select>
@@ -410,9 +368,9 @@ function NewResponsable_Profile() {
                       </div>
                     </div>
                     <div className="flex items-center justify-center my-6">
-                      {(msgErr || errorCurrent) && (
+                      {msgErr && (
                         <span className="text-xs text-red-500">
-                          {msgErr || errorCurrent}
+                          {msgErr}
                         </span>
                        )}
                     </div>
@@ -453,7 +411,7 @@ function NewResponsable_Profile() {
                       Vous avez un compte ?
                       <Link
                         className="font-medium text-violet-500 hover:text-violet-600 dark:hover:text-violet-400"
-                        to="/"
+                        to="/login"
                       >
                         {" "}
                         Connectez vous
@@ -466,95 +424,11 @@ function NewResponsable_Profile() {
               <>
                 <div className="w-full max-w-sm p-10 px-4 py-8 mx-auto border-2 border-dashed rounded-lg border-violet-500 outline-4">
                   <h1 className="mb-6 text-2xl font-bold text-gray-800 dark:text-gray-100">
-                    AJoutez votre login à votre compte
+                    Inscription réussie !
                   </h1>
-                  {/* Form d'ajout de login */}
-                  <form onSubmit={handleSubmit(onSubmitLogin)} className="">
-                    <div className="space-y-4">
-                      <div>
-                        <label
-                          className="block mb-1 text-sm font-medium "
-                          htmlFor="login"
-                        >
-                          Email<span className="text-red-500"> *</span>
-                        </label>
-                        <input
-                          id="login"
-                          className="w-full form-input"
-                          placeholder="Entrez votre email"
-                          type="email"
-                          {...register("login", { required: true })}
-                        />
-                        {errors.login && (
-                          <span className="text-xs text-red-500">
-                            Ce champ est requis
-                          </span>
-                        )}
-                      </div>
-                      <div>
-                        <label
-                          className="block mb-1 text-sm font-medium "
-                          htmlFor="password"
-                        >
-                          Mot de passe<span className="text-red-500"> *</span>
-                        </label>
-                        <input
-                          id="password"
-                          className="w-full form-input"
-                          placeholder="Entrez votre mot de passe"
-                          type="password"
-                          {...register("password", { 
-                            required: "Le mot de passe est requis",
-                            minLength: {
-                              value: 6,
-                              message: "Le mot de passe doit contenir au moins 6 caractères"
-                            }
-                          })}
-                        />
-                        {errors.password && (
-                          <span className="text-xs text-red-500">
-                            {errors.password.message}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-center my-2">
-                      {msgErr ? (
-                        <span className="text-xs text-red-500">{msgErr}</span>
-                      ) : null}
-                    </div>
-                    <div className="flex items-center justify-between mt-6">
-                      <button
-                        type="submit"
-                        className="bg-white border-gray-200 btn dark:bg-gray-800 dark:border-gray-700/60 hover:border-gray-300 dark:hover:border-gray-600"
-                      >
-                        {loading ? (
-                          <>
-                            <svg
-                              className="fill-current animate-spin shrink-0"
-                              width="16"
-                              height="16"
-                              viewBox="0 0 16 16"
-                            >
-                              <path d="M8 16a7.928 7.928 0 01-3.428-.77l.857-1.807A6.006 6.006 0 0014 8c0-3.309-2.691-6-6-6a6.006 6.006 0 00-5.422 8.572l-1.806.859A7.929 7.929 0 010 8c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8z" />
-                            </svg>
-                          </>
-                        ) : (
-                          <div className="flex items-center gap-1">
-                            Valider
-                            <svg
-                              className="fill-current text-violet-500 shrink-0"
-                              width="16"
-                              height="16"
-                              viewBox="0 0 16 16"
-                            >
-                              <path d="M14.3 2.3L5 11.6 1.7 8.3c-.4-.4-1-.4-1.4 0-.4.4-.4 1 0 1.4l4 4c.2.2.4.3.7.3.3 0 .5-.1.7-.3l10-10c.4-.4.4-1 0-1.4-.4-.4-1-.4-1.4 0z" />
-                            </svg>
-                          </div>
-                        )}
-                      </button>
-                    </div>
-                  </form>
+                  <div className="text-center text-gray-600 dark:text-gray-400">
+                    <p>Votre compte a été créé avec succès.<br />Vous pouvez maintenant vous connecter.</p>
+                  </div>
                 </div>
               </>
             )}
@@ -622,7 +496,7 @@ function NewResponsable_Profile() {
                   e.stopPropagation();
                   if (responsableAddId && loginAdd) {
                     navigate("/profiles/validation", { 
-                      state: { userId: responsableAddId }
+                      state: { userId: responsableAddId, code: code }
                     });
                   } else {
                     setInfoModalOpen(false);

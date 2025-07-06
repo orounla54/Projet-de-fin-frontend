@@ -6,7 +6,7 @@ const AuthService = {
     login: async (data) => {
         try {
             console.log('Tentative de connexion avec:', { email: data.email });
-            const response = await axios.post(`${baseURL}/profiles/auth`, {
+            const response = await axios.post(`${baseURL}/api/auth/login`, {
                 email: data.email,
                 password: data.password
             });
@@ -27,24 +27,39 @@ const AuthService = {
     },
 
     // Déconnexion de l'utilisateur
-    logout: () => {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('user');
+    logout: async () => {
+        try {
+            const token = localStorage.getItem('accessToken');
+            if (token) {
+                await axios.post(`${baseURL}/api/auth/logout`, {}, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+            }
+        } catch (error) {
+            console.error('Erreur lors de la déconnexion:', error);
+        } finally {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('user');
+        }
     },
 
     // Vérification de l'authentification
     checkAuth: async () => {
         try {
             const token = localStorage.getItem('accessToken');
+            const storedUser = localStorage.getItem('user');
+            
             if (!token) {
                 return { isAuthenticated: false };
             }
 
-            const response = await axios.get(`${baseURL}/profiles/me`, {
+            const response = await axios.get(`${baseURL}/api/auth/me`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
             if (response.data) {
+                // Mettre à jour les données utilisateur dans le localStorage
+                localStorage.setItem('user', JSON.stringify(response.data));
                 return { 
                     isAuthenticated: true, 
                     user: response.data
@@ -53,8 +68,28 @@ const AuthService = {
             return { isAuthenticated: false };
         } catch (error) {
             console.error('Erreur de vérification d\'authentification:', error);
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('user');
+            
+            // En cas d'erreur réseau, essayer d'utiliser les données stockées
+            if (error.code === 'NETWORK_ERROR' || error.code === 'ERR_NETWORK') {
+                const storedUser = localStorage.getItem('user');
+                const token = localStorage.getItem('accessToken');
+                
+                if (storedUser && token) {
+                    console.log('Utilisation des données utilisateur stockées (erreur réseau)');
+                    return { 
+                        isAuthenticated: true, 
+                        user: JSON.parse(storedUser)
+                    };
+                }
+            }
+            
+            // Ne supprimer le token que pour les erreurs d'authentification spécifiques
+            if (error.response?.status === 401 || error.response?.status === 403) {
+                console.log('Token invalide, suppression des données de session');
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('user');
+            }
+            
             return { isAuthenticated: false };
         }
     },
@@ -63,7 +98,7 @@ const AuthService = {
     updateProfile: async (userData) => {
         try {
             const token = localStorage.getItem('accessToken');
-            const response = await axios.put(`${baseURL}/profiles/me`, userData, {
+            const response = await axios.put(`${baseURL}/api/users/profile`, userData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             return { success: true, user: response.data };
@@ -78,7 +113,7 @@ const AuthService = {
     // Inscription
     register: async (userData) => {
         try {
-            const response = await axios.post(`${baseURL}/profiles/responsable/nouveau`, userData);
+            const response = await axios.post(`${baseURL}/api/auth/register`, userData);
             return { success: true, data: response.data };
         } catch (error) {
             return { 
@@ -91,7 +126,7 @@ const AuthService = {
     // Validation du compte
     validateAccount: async (email, code) => {
         try {
-            const response = await axios.post(`${baseURL}/profiles/validation`, {
+            const response = await axios.post(`${baseURL}/api/auth/verify-email`, {
                 email,
                 code
             });
@@ -107,7 +142,7 @@ const AuthService = {
     // Réinitialisation du mot de passe
     resetPassword: async (email) => {
         try {
-            const response = await axios.post(`${baseURL}/profiles/request-reset`, { email });
+            const response = await axios.post(`${baseURL}/api/auth/forgot-password`, { email });
             return { success: true, data: response.data };
         } catch (error) {
             return { 

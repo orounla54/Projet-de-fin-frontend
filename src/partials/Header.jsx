@@ -17,19 +17,19 @@ function Header({ sidebarOpen, setSidebarOpen, variant = "default" }) {
 
   const location = useLocation();
 
-  const {
-    data,
-    error: errorGet,
-    loading: loadingGet,
-    fetchData,
-  } = useGetData(`profiles/log`);
+  // const {
+  //   data,
+  //   error: errorGet,
+  //   loading: loadingGet,
+  //   fetchData,
+  // } = useGetData(`profiles/log`);
 
-  useEffect(() => {
-    if (data) {
-      setProfile(data);
-    }
-    // console.log(profile);
-  }, [data]);
+  // useEffect(() => {
+  //   if (data) {
+  //     setProfile(data);
+  //   }
+  //   // console.log(profile);
+  // }, [data]);
 
 
   return (

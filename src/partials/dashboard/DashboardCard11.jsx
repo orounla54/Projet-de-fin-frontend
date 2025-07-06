@@ -51,12 +51,7 @@ function DashboardCard11({
 
   const [responsableLog, setResponsableLog] = useState({});
 
-  const {
-    data: respo,
-    loading: loadingRespo,
-    error: errorRespo,
-    fetchData: fetchReso,
-  } = useGetData(`/responsables/log`);
+  // } = useGetData(`/responsables/log`);
 
   useEffect(() => {
     if (respo) {

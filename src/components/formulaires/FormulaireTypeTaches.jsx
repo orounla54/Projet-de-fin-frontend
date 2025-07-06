@@ -23,7 +23,7 @@ function FormulaireTypeTaches() {
     error: postError,
     loading: postLoading,
     postData,
-  } = usePostData(`typesTaches`);
+  } = usePostData(`filter/typesTaches`);
 
   const [msgError, setMsgError] = useState("");
 

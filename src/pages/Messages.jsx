@@ -48,20 +48,13 @@ function Messages() {
     id ? `messages/discussion/${id}` : ""
   );
 
-  //get responsable log
-  const {
-    data: responsable,
-    error: responsableError,
-    loading: responsableLoading,
-  } = useGetData("responsables/log");
-
   //get discussion for log
   const {
     data: DiscussionsData,
     loading: DiscussionsLoading,
     error: DiscussionsError,
     fetchData: fetchDiscussions,
-  } = useGetData(`discussions?keyword=${keyword}`);
+  } = useGetData(`api/discussions?keyword=${keyword}`);
 
   //get discussion current
   const {
@@ -69,7 +62,7 @@ function Messages() {
     loading: DiscussionsCurrentLoading,
     error: DiscussionsCurrentError,
     fetchData: fetchDiscussionCurrent,
-  } = useGetData(id ? `discussions/${parseInt(id)}` : "");
+  } = useGetData(id ? `api/discussions/${parseInt(id)}` : "");
 
   //get medias discussion current
   const {
@@ -77,14 +70,7 @@ function Messages() {
     loading: mediasDiscussionsCurrentLoading,
     error: mediasDiscussionsCurrentError,
     fetchData: mediasFetchDiscussionCurrent,
-  } = useGetData(id ? `mediaDiscu/${parseInt(id)}` : "");
-
-  useEffect(() => {
-    if (responsable) {
-      setResponsableLog(responsable);
-    }
-    // console.log(responsableLog);
-  }, [responsable]);
+  } = useGetData(id ? `api/discussions/mediaDiscu/${parseInt(id)}` : "");
 
   useEffect(() => {
     if (DiscussionsData) {

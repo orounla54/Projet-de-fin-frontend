@@ -16,7 +16,7 @@ function InvoicesTable({
 }) {
   const handleClick = (e) => {
     const { id, checked } = e.target;
-    const itemId = parseInt(id, 10); // Conversion en nombre pour garantir la compatibilité
+    const itemId = id; // Laisse l'ID tel quel (string)
 
     setSelectAll(false);
     setIsCheck((prevCheck) =>
@@ -58,15 +58,10 @@ function InvoicesTable({
                   </div>
                 </th>
                 <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap text-center">
-                  <div className="font-semibold text-left">Libelle</div>
+                  <div className="font-semibold text-left">Titre</div>
                 </th>
                 <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
                   <div className="font-semibold text-center">Date d'ajout</div>
-                </th>
-                <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                  <div className="font-semibold text-center">
-                    Date prise de décision
-                  </div>
                 </th>
                 <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
                   <div className="font-semibold text-center">Date début</div>
@@ -75,10 +70,10 @@ function InvoicesTable({
                   <div className="font-semibold text-center">Date fin</div>
                 </th>
                 <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                  <div className="font-semibold text-center">Deadline</div>
+                  <div className="font-semibold text-center">Statut</div>
                 </th>
                 <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                  <div className="font-semibold text-center">Status</div>
+                  <div className="font-semibold text-center">Service</div>
                 </th>
                 <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
                   <div className="font-semibold text-center">Actions</div>
@@ -89,7 +84,7 @@ function InvoicesTable({
             <tbody className="text-sm divide-y divide-gray-100 dark:divide-gray-700/60">
               {error && (
                 <tr>
-                  <td colSpan="9" className="text-center text-red-500">
+                  <td colSpan="8" className="text-center text-red-500">
                     {"Erreur lors de la récupération des données."}
                   </td>
                 </tr>
@@ -97,7 +92,7 @@ function InvoicesTable({
 
               {projets.length === 0 && (
                 <tr className="">
-                  <td colSpan="9" className="p-4 text-center text-violet-400">
+                  <td colSpan="8" className="p-4 text-center text-violet-400">
                     Aucun resultat pour les parametres entrer...
                   </td>
                 </tr>
@@ -105,25 +100,23 @@ function InvoicesTable({
 
               {loading ? (
                 <tr>
-                  <td colSpan="9" className="text-center">
+                  <td colSpan="8" className="text-center">
                     <SpinnerLoading />
                   </td>
                 </tr>
               ) : (
                 projets.map((projet) => (
                   <Invoices
-                    id={projet.id}
-                    key={projet.id}
-                    libelle={projet.libelle}
-                    dateInscription={projet.dateInscription}
-                    datePriseDecision={projet.datePriseDecision}
+                    id={projet._id || projet.id}
+                    key={projet._id || projet.id}
+                    titre={projet.titre}
+                    dateInscription={projet.createdAt}
                     dateDebut={projet.dateDebut}
                     dateFin={projet.dateFin}
-                    deadline={projet.deadline}
-                    status={projet.status}
-                    newProjet={projet.newProjet}
+                    statut={projet.statut}
+                    service={projet.service?.nom}
                     handleClick={handleClick}
-                    isChecked={isCheck.includes(projet.id)}
+                    isChecked={isCheck.includes(projet._id || projet.id)}
                     refreshList={refreshList}
                   />
                 ))

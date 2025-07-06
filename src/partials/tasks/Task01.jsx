@@ -53,7 +53,7 @@ function Task01({ tache, sousTache }) {
     loading: imagesTacheLoading,
     error: imagesTacheError,
     fetchData: fetchDataIMG,
-  } = useGetData(`ImgsTache/${tache.id}`);
+  } = useGetData(`api/taches/ImgsTache/${tache.id}`);
 
   useEffect(() => {
     if (imagesTache) {

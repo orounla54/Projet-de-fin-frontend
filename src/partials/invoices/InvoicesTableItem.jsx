@@ -7,9 +7,9 @@ import { Link } from "react-router-dom";
 function  InvoicesTableItem(props) {
   const totalColor = (status) => {
     switch (status) {
-      case "Terminé":
+      case "terminé":
         return "text-green-500";
-      case "En-cours":
+      case "en cours":
         return "text-yellow-500";
       default:
         return "text-gray-500";
@@ -18,10 +18,16 @@ function  InvoicesTableItem(props) {
 
   const statusColor = (status) => {
     switch (status) {
-      case "Terminé":
+      case "terminé":
         return "bg-green-500/20 text-green-700";
-      case "En-cours":
+      case "en cours":
         return "bg-yellow-500/20 text-yellow-700";
+      case "planifié":
+        return "bg-blue-500/20 text-blue-700";
+      case "suspendu":
+        return "bg-orange-500/20 text-orange-700";
+      case "annulé":
+        return "bg-red-500/20 text-red-700";
       default:
         return "bg-gray-400/20 text-gray-500 dark:text-gray-400";
     }
@@ -46,7 +52,7 @@ function  InvoicesTableItem(props) {
       <td className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
         <div className="font-medium text-sky-800 text-left">
           <Link to={`/projets/${props.id}`}>
-            <LibelleFormat libelle={props.libelle} />
+            <LibelleFormat libelle={props.titre} />
           </Link>
         </div>
       </td>
@@ -57,16 +63,7 @@ function  InvoicesTableItem(props) {
       </td>
       <td className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
         <div className="font-medium text-gray-800 dark:text-gray-100">
-        {props.datePriseDecision ? (
-            <DateRefactor date={props.datePriseDecision} />
-          ) : (
-            <span className="text-xs">Aucune date</span>
-          )}
-        </div>
-      </td>
-      <td className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-        <div className="font-medium text-gray-800 dark:text-gray-100">
-        {props.dateDebut  ? (
+        {props.dateDebut ? (
             <DateRefactor date={props.dateDebut} />
           ) : (
             <span className="text-xs">Aucune date</span>
@@ -83,23 +80,19 @@ function  InvoicesTableItem(props) {
         </div>
       </td>
       <td className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-        <div className="font-medium text-gray-800 dark:text-gray-100">
-        {props.deadline  ? (
-            <DateRefactor date={props.deadline} />
-          ) : (
-            <span className="text-xs">Aucune date</span>
-          )}
-        </div>
-      </td>
-      <td className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
         <div className="flex items-center justify-center">
           <div
             className={`inline-flex text-xs rounded-full text-center px-2 ${statusColor(
-              props.status
+              props.statut
             )}`}
           >
-            {props.status}
+            {props.statut}
           </div>
+        </div>
+      </td>
+      <td className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+        <div className="font-medium text-gray-800 dark:text-gray-100">
+          {props.service || <span className="text-xs">Aucun service</span>}
         </div>
       </td>
       <td className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap w-px">
@@ -117,7 +110,7 @@ function  InvoicesTableItem(props) {
             refreshList={props.refreshList}
             endpoint="projets"
             idObjet={props.id}
-            libelleObjet={props.libelle}
+            libelleObjet={props.titre}
           />
         </div>
       </td>

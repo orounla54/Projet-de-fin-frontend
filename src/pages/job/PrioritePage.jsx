@@ -40,12 +40,12 @@ function PrioritePage({ page }) {
   const [sousPage, setSousPage] = useState("Principal");
   const [responsableLog, setResponsableLog] = useState({});
 
-  const {
-    data: respo,
-    loading: loadingRespo,
-    error: errorRespo,
-    fetchData: fetchReso,
-  } = useGetData(`/responsables/log`);
+  // const {
+  //   data: respo,
+  //   loading: loadingRespo,
+  //   error: errorRespo,
+  //   fetchData: fetchReso,
+  // } = useGetData(`/responsables/log`);
 
   useEffect(() => {
     if (respo) {

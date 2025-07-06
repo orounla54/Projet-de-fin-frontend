@@ -55,12 +55,12 @@ function ProjetsFiltre() {
     ...(filter?.deadline && { deadline: filter.deadline }),
     ...(filter?.dateDebut && { dateDebut: filter.dateDebut }),
     ...(filter?.dateFin && { dateFin: filter.dateFin }),
-    ...(filter?.idStatus && { idStatusProjet: filter.idStatus }),
+    ...(filter?.idStatus && { statut: filter.idStatus }),
   }).toString();
 
   // Récupérer les données avec les paramètres de filtre conditionnels
   const { data, loading, error, fetchData } = useGetData(
-    queryParams ? `projets/filter?${queryParams}` : ""
+    queryParams ? `/api/projets/public?${queryParams}` : "/api/projets/public"
   );
 
   // console.log(filter);
@@ -98,7 +98,7 @@ function ProjetsFiltre() {
 
   // Fonction pour supprimer les éléments sélectionnés
   const [deleteAllLoading, setDeleteAllLoading] = useState(false);
-  const { deleteData: deleteProjet } = useDeleteData('projets');
+  const { deleteData: deleteProjet } = useDeleteData('/api/projets');
 
   const deleteAll = async (selectedItems) => {
     setDeleteAllLoading(true);

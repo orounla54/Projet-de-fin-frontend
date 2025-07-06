@@ -26,7 +26,7 @@ function AddResponsablesToEvent({
     data: servicesData,
     loading: servicesLoading,
     error: servicesError,
-  } = useGetData(`/services/forUpdate`);
+  } = useGetData(`/api/services/forUpdate`);
 
   // Construire dynamiquement l'URL en fonction de l'existence de `filter`
   const queryParams = new URLSearchParams({
@@ -34,12 +34,12 @@ function AddResponsablesToEvent({
     idService: serviceSelectId ? serviceSelectId : "",
   }).toString();
 
-  // Récupérer les données avec les paramètres de filtre conditionnels
+  // Récupérer les responsables (remplacer filter/responsables par api/users/actifs)
   const {
     data,
     loading: loadingResp,
     error: errorResp,
-  } = useGetData(`filter/responsables?${queryParams}`);
+  } = useGetData(`/api/users/actifs`);
   useEffect(() => {
     if (data) {
       setResponsables(data);

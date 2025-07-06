@@ -160,41 +160,33 @@ function FormulaireTaches({ tache }) {
     data: projetsData,
     loading: projetsLoading,
     error: projetsError,
-  } = useGetData(`/projets`);
+  } = useGetData(`/api/projets/public`);
 
   const {
     data: responsablesData,
     loading: responsablesLoading,
     error: responsablesError,
-  } = useGetData(`/responsables`);
+  } = useGetData(`/api/users/actifs`);
 
   const {
     data: servicesData,
     loading: servicesLoading,
     error: servicesError,
-  } = useGetData(`/services/forUpdate`);
+  } = useGetData(`/api/services/forUpdate`);
 
   const {
     data: typesTachesData,
     loading: typesTachesLoading,
     error: typesTachesError,
-  } = useGetData(`/typesTaches`);
+  } = useGetData(`/api/typesTaches/filter`);
 
-  // Construire dynamiquement l'URL en fonction de l'existence de `filter`
-  const queryParams = new URLSearchParams({
-    keyword: keyword,
-    idService: serviceSelectId ? serviceSelectId : "",
-  }).toString();
-
-  // Récupérer les données avec les paramètres de filtre conditionnels
-  const { data, loading, error } = useGetData(
-    `filter/responsables?${queryParams}`
-  );
+  // Pour la recherche dynamique de responsables, utiliser aussi /api/users/actifs
+  const { data: responsablesAutreData, loading: loadingRespAutre, error: errorRespAutre } = useGetData(`/api/users/actifs`);
   useEffect(() => {
-    if (data) {
-      setResponsablesAutre(data);
+    if (responsablesAutreData) {
+      setResponsablesAutre(responsablesAutreData);
     }
-  }, [data]);
+  }, [responsablesAutreData]);
 
   //chargement des selects
   useEffect(() => {
@@ -298,7 +290,7 @@ function FormulaireTaches({ tache }) {
       {projetsLoading ||
       responsablesLoading ||
       servicesLoading ||
-      loading ||
+      loadingRespAutre ||
       typesTachesLoading ? (
         <div className="absolute z-40 flex items-center justify-center w-full h-full bg-white dark:bg-gray-800">
           <SpinnerLoading />

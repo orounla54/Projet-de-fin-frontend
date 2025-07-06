@@ -140,11 +140,9 @@ function Forum() {
   } = useGetData(`filter/evenements/occurence?${queryParams}`);
 
   useEffect(() => {
-    if (dataEventToday) {
+    if (dataEventToday && Array.isArray(dataEventToday.data)) {
       const seen = new Map();
-
-      // Parcourir pour trouver la première eventStart et la dernière eventEnd pour chaque occurenceEvent
-      dataEventToday.forEach((event) => {
+      dataEventToday.data.forEach((event) => {
         const eventStartISO = new Date(event.eventStart).toISOString();
         const eventEndISO = new Date(event.eventEnd).toISOString();
 
@@ -193,9 +191,9 @@ function Forum() {
   } = useGetData(`filter/taches?${queryParams1}`);
 
   useEffect(() => {
-    if (dataIU) {
+    if (dataIU && Array.isArray(dataIU.data)) {
       // Filtrer les tâches avec un IdStatusTache différent de 3
-      const filteredTaches = dataIU.filter(
+      const filteredTaches = dataIU.data.filter(
         (tache) => tache.status !== "Terminé"
       );
       setTachesIU(filteredTaches);
@@ -207,7 +205,7 @@ function Forum() {
     data: dataTT,
     loading: loadingTT,
     error: errorTT,
-  } = useGetData(`/typesTaches`);
+  } = useGetData(`/filter/typesTaches`);
 
   useEffect(() => {
     if (dataTT) {
@@ -223,9 +221,9 @@ function Forum() {
   } = useGetData(`filter/taches`);
 
   useEffect(() => {
-    if (dataTR) {
+    if (dataTR && Array.isArray(dataTR.data)) {
       setTachesEnRetard(
-        dataTR.filter(
+        dataTR.data.filter(
           (tache) => tache.enRetard === 1 && tache.status !== "Terminé"
         )
       );

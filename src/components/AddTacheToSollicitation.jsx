@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import axios from "axios";
 import AuthService from "../utils/Auth/AuthServices";
 import ModalBasic from "./ModalBasic";
-import { useGetData } from "../utils/Requests/RequestService";
+import { useGetData, usePostData } from "../utils/Requests/RequestService";
 import SpinnerLoading from "./SpinnerLoading";
 
 function AddTacheToSollicitation({
@@ -167,26 +167,26 @@ function AddTacheToSollicitation({
     data: servicesData,
     loading: servicesLoading,
     error: servicesError,
-  } = useGetData(`/services/forUpdate`);
+  } = useGetData(`/api/services/forUpdate`);
 
   // Met à jour les etats
   const {
     data: projetsData,
     loading: projetsLoading,
     error: projetsError,
-  } = useGetData(`/projets`);
+  } = useGetData(`/api/projets/public`);
 
   const {
     data: responsablesData,
     loading: responsablesLoading,
     error: responsablesError,
-  } = useGetData(`/responsables`);
+  } = useGetData(`/api/users/actifs`);
 
   const {
     data: typesTachesData,
     loading: typesTachesLoading,
     error: typesTachesError,
-  } = useGetData(`/typesTaches`);
+  } = useGetData(`/api/typesTaches/filter`);
 
   //chargement des selects
   useEffect(() => {

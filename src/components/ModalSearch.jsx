@@ -11,7 +11,7 @@ function ModalSearch({ id, searchId, modalOpen, setModalOpen }) {
   const [resultats, setResultats] = useState([]);
 
   const { data, loading, error, fetchData } = useGetData(
-    `/search/taches?keyword=${keyword}`
+    `/filter/taches?keyword=${keyword}`
   );
 
   useEffect(() => {

@@ -29,12 +29,12 @@ function Account() {
   const [error, setError] = useState(null);
 
   // Récupération du responsable avec un hook personnalisé
-  const {
-    data: responsable,
-    error: responsableError,
-    loading: responsableLoading,
-    fetchData
-  } = useGetData("responsables/log");
+  // const {
+  //   data: responsable,
+  //   error: responsableError,
+  //   loading: responsableLoading,
+  //   fetchData
+  // } = useGetData("responsables/log");
 
   useEffect(() => {
     // Fonction pour gérer la requête
@@ -97,7 +97,7 @@ function Account() {
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
         <main className="relative grow">
-          {loading || responsableLoading ? (
+          {loading ? (
             <div className="absolute z-40 flex items-center justify-center w-full h-full bg-white dark:bg-gray-900">
               <SpinnerLoading />
             </div>
@@ -114,11 +114,6 @@ function Account() {
                   {error && (
                     <p className="text-xs text-center text-red-500">{error}</p>
                   )}
-                  {responsableError && (
-                    <p className="text-xs text-center text-red-500">
-                      {responsableError}
-                    </p>
-                  )}
                 </div>
 
                 {/* Content */}
@@ -126,7 +121,7 @@ function Account() {
                   <div className="flex flex-col md:flex-row md:-mr-px">
                     <SettingsSidebar />
                     <AccountPanel
-                      fetchData={fetchData}
+                      // fetchData={fetchData}
                       responsableLog={responsableLog}
                     />
                   </div>

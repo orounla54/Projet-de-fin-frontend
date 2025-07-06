@@ -14,7 +14,7 @@ function ModifierProjets() {
   const [projet, setProjet] = useState({});
 
   // Récupère les données via le hook personnalisé
-  const { data, loading, error } = useGetData(id ? `/projets/${id}` : "");
+  const { data, loading, error } = useGetData(id ? `/api/projets/${id}` : "");
 
   // Met à jour l'état du tache quand `data` change
   useEffect(() => {

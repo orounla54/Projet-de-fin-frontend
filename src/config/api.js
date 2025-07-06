@@ -42,7 +42,7 @@ const API_ENDPOINTS = {
     TASKS: {
         BASE: `${baseURL}/taches`,
         FILTER: `${baseURL}/filter/taches`,
-        TYPES: `${baseURL}/typesTaches`,
+        TYPES: `${baseURL}/filter/typesTaches`,
         DEFAULT: `${baseURL}/tachesParDefaut/evenements`
     },
 

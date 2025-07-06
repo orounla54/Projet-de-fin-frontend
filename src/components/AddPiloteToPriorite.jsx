@@ -26,13 +26,19 @@ function AddPiloteToPriorite({
     data: servicesData,
     loading: servicesLoading,
     error: servicesError,
-  } = useGetData(`/services/forUpdate`);
+  } = useGetData(`/api/services/forUpdate`);
   
   const {
     data:rolesData,
     loading: rolesLoading,
     error: rolesError,
   } = useGetData(`rolesPlan`);
+
+  const {
+    data: typesTachesData,
+    loading: typesTachesLoading,
+    error: typesTachesError,
+  } = useGetData(`/api/typesTaches/filter`);
 
   // Construire dynamiquement l'URL en fonction de l'existence de `filter`
   const queryParams = new URLSearchParams({

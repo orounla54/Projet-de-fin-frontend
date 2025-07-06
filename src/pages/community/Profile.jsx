@@ -34,12 +34,7 @@ function Profile() {
       : ""
   );
 
-  const {
-    data: respo,
-    loading: loadingRespo,
-    error: errorRespo,
-    fetchData: fetchReso,
-  } = useGetData(`/responsables/log`);
+  // } = useGetData(`/responsables/log`);
 
   // Construire dynamiquement l'URL en fonction de l'existence de `filter`
   const queryParams = new URLSearchParams({
@@ -89,7 +84,7 @@ function Profile() {
         />
 
         <main className="relative grow">
-          {loading || loadingListe || loadingRespo ? (
+          {loading || loadingListe ? (
             <div className="absolute z-40 flex items-center justify-center w-full h-full bg-white dark:bg-gray-900">
               <SpinnerLoading />
             </div>

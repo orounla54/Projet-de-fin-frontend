@@ -19,7 +19,7 @@ function TasksList() {
   const [keyword, setKeyword] = useState("");
   const [search, setSearch] = useState(false)
 
-  const { data, loading, error, fetchData } = useGetData(`private/taches${enpointSwitch}?keyword=${keyword}`);
+  const { data, loading, error, fetchData } = useGetData(`api/taches/private${enpointSwitch}?keyword=${keyword}`);
 
   const switchTache = async () => {
     await fetchData();

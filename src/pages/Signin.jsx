@@ -2,23 +2,17 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { useAuth } from "../utils/Auth/AuthContext";
-import axios from "axios";
-import { baseURL } from "../utils/DataFront/eventTypes";
+import { useSuccessMessage } from "../utils/SuccessContext";
+import AuthService from "../utils/Auth/AuthServices";
 import ModalBlank from "../components/ModalBlank";
 import AuthImage from "../images/pexels-tima-miroshnichenko-5452188.jpg";
 
 function Signin() {
-  const baseUrl = baseURL;
-  console.log('URL de base utilisée:', baseUrl);
-
-  const [infoModalOpen, setInfoModalOpen] = useState(true);
-
-  const [msgErr, setMsgErr] = useState("");
-  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
   const { login } = useAuth();
-
-  const [code, setCode] = useState("");
-  const [messageCode, setMessageCode] = useState("");
+  const { showSuccessMessage } = useSuccessMessage();
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const {
     register,
@@ -26,54 +20,25 @@ function Signin() {
     formState: { errors },
   } = useForm();
 
-  const navigate = useNavigate();
-
-  const openInfoModal = () => setInfoModalOpen(true);
-
   const onSubmit = async (data) => {
     try {
-      setLoading(true);
-      setMsgErr(""); // Réinitialiser les erreurs précédentes
-
-      // Vérification des données avant envoi
-      if (!data.login || !data.password) {
-        setMsgErr("Email et mot de passe requis");
-        return;
-      }
-
-      console.log('Tentative de connexion avec:', { email: data.login });
-      
-      // Utiliser la fonction login du contexte d'authentification
-      const success = await login(data.login.trim(), data.password);
-      
+      setIsLoading(true);
+      setError("");
+      const success = await login(data.email, data.password);
       if (success) {
-        console.log('Connexion réussie, redirection...');
+        showSuccessMessage("Connexion réussie !");
         navigate("/");
       } else {
-        setMsgErr("Email ou mot de passe incorrect");
+        setError("Email ou mot de passe incorrect");
       }
-    } catch (error) {
-      console.error('Erreur de connexion complète:', error);
-      console.error('Détails de l\'erreur:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-        headers: error.response?.headers
-      });
-      
-      if (error.response) {
-        setMsgErr(
-          error.response.data?.message || "Erreur lors de la connexion."
-        );
-      } else if (error.request) {
-        console.error('Pas de réponse reçue:', error.request);
-        setMsgErr("Le serveur ne répond pas. Veuillez vérifier votre connexion.");
-      } else {
-        console.error('Erreur lors de la configuration de la requête:', error.message);
-        setMsgErr("Problème de connexion au serveur.");
-      }
+    } catch (err) {
+      console.error("Erreur de connexion:", err);
+      setError(
+        err.response?.data?.message ||
+        "Une erreur est survenue lors de la connexion. Veuillez réessayer."
+      );
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -123,15 +88,19 @@ function Signin() {
                     </label>
                     <input
                       id="email"
-                      className="w-full form-input"
+                      className={`w-full form-input ${errors.email ? "is-invalid" : ""}`}
                       placeholder="Entrez votre email"
                       type="email"
-                      {...register("login", { required: true })}
+                      {...register("email", {
+                        required: "L'email est requis",
+                        pattern: {
+                          value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                          message: "Adresse email invalide",
+                        },
+                      })}
                     />
-                    {errors.login && (
-                      <span className="text-xs text-red-500">
-                        Ce champ est requis
-                      </span>
+                    {errors.email && (
+                      <div className="invalid-feedback">{errors.email.message}</div>
                     )}
                   </div>
                   <div>
@@ -143,23 +112,27 @@ function Signin() {
                     </label>
                     <input
                       id="password"
-                      className="w-full form-input"
+                      className={`w-full form-input ${errors.password ? "is-invalid" : ""}`}
                       type="password"
                       autoComplete="on"
                       placeholder="Entrez votre mot de passe"
-                      {...register("password", { required: true })}
+                      {...register("password", {
+                        required: "Le mot de passe est requis",
+                        minLength: {
+                          value: 6,
+                          message: "Le mot de passe doit contenir au moins 6 caractères",
+                        },
+                      })}
                     />
                     {errors.password && (
-                      <span className="text-xs text-red-500">
-                        Ce champ est requis
-                      </span>
+                      <div className="invalid-feedback">{errors.password.message}</div>
                     )}
                   </div>
                 </div>
                 <div className="flex items-center justify-center mb-2">
-                  {msgErr ? (
-                    <span className="text-xs text-red-500">{msgErr}</span>
-                  ) : null}
+                  {error && (
+                    <div className="text-xs text-red-500">{error}</div>
+                  )}
                 </div>
                 <div className="mt-2">
                   <p className="text-sm sm:text-start">
@@ -187,8 +160,9 @@ function Signin() {
                   <button
                     type="submit"
                     className="bg-white border-gray-200 btn dark:bg-gray-800 dark:border-gray-700/60 hover:border-gray-300 dark:hover:border-gray-600"
+                    disabled={isLoading}
                   >
-                    {loading ? (
+                    {isLoading ? (
                       <>
                         <svg
                           className="fill-current animate-spin shrink-0"
@@ -248,8 +222,8 @@ function Signin() {
 
       <ModalBlank
         id="info-modal"
-        modalOpen={infoModalOpen}
-        setModalOpen={setInfoModalOpen}
+        modalOpen={false}
+        setModalOpen={() => {}}
       >
         <div className="flex p-5 space-x-4">
           {/* Icon */}
@@ -275,10 +249,10 @@ function Signin() {
             <div className="text-center text-gray-600 dark:text-gray-400">
               <div className="mb-10 text-sm">
                 <div className="space-y-1">
-                  <p>{messageCode && messageCode}</p>
+                  <p>
+                    Votre connexion a échoué. Veuillez réessayer plus tard.
+                  </p>
                 </div>
-                <br />
-                <h1 className="text-xl font-bold">{code && code}</h1>
               </div>
             </div>
             {/* Modal footer */}
@@ -286,12 +260,10 @@ function Signin() {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  setInfoModalOpen(false);
-                  navigate("/profiles/validation");
                 }}
                 className="text-gray-100 bg-gray-900 btn-sm hover:bg-gray-800 dark:bg-gray-100 dark:text-gray-800 dark:hover:bg-white"
               >
-                Valider
+                Fermer
               </button>
             </div>
           </div>

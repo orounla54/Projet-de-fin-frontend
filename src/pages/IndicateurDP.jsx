@@ -271,12 +271,7 @@ function IndicateurDP() {
 
   const [AllTaches, setAllTaches] = useState([]);
 
-  //get responsable
-  const {
-    data: responsableLog,
-    error: responsableError,
-    loading: responsableLoading,
-  } = useGetData("responsables/log");
+  // } = useGetData("responsables/log");
 
   useEffect(() => {
     if (responsableLog) {
@@ -296,14 +291,14 @@ function IndicateurDP() {
     data: dataTask,
     error: taskError,
     loading: taskLoading,
-  } = useGetData(`indicateurDP/responsable?${queryParams}`);
+  } = useGetData(`api/stats/indicateurDP/responsable?${queryParams}`);
 
   //get Tache for IDP
   const {
     data: dataTaskContribution,
     error: taskContributionError,
     loading: taskContributionLoading,
-  } = useGetData(`indicateurDP/contributeur?${queryParams}`);
+  } = useGetData(`api/stats/indicateurDP/contributeur?${queryParams}`);
 
   //get all taches
   useEffect(() => {

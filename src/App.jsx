@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 
 import "./css/style.css";
 import { useAuth } from "./utils/Auth/AuthContext";
@@ -65,18 +65,27 @@ function App() {
     document.querySelector("html").style.scrollBehavior = "";
   }, [location.pathname]); // triggered on route change
 
+  // Composant de redirection pour les routes protégées
+  const ProtectedRoute = ({ children }) => {
+    if (loading) {
+      return <div>Chargement...</div>;
+    }
+    if (!isAuthenticated) {
+      return <Navigate to="/login" replace />;
+    }
+    return children;
+  };
+
   return (
     <>
       <SuccessMessageProvider>
         <Routes>
+          {/* Route de connexion */}
           <Route
-            exact
-            path="/"
+            path="/login"
             element={
               isAuthenticated ? (
-                <TitlePage title="Accueil">
-                  <Forum />
-                </TitlePage>
+                <Navigate to="/" replace />
               ) : (
                 <TitlePage title="Connexion">
                   <Signin />
@@ -85,12 +94,29 @@ function App() {
             }
           />
 
+          {/* Route racine */}
+          <Route
+            path="/"
+            element={
+              isAuthenticated ? (
+                <TitlePage title="Accueil">
+                  <Forum />
+                </TitlePage>
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+
+          {/* Routes protégées */}
           <Route
             path="/projets"
             element={
-              <TitlePage title="Projets">
-                <JobListing />
-              </TitlePage>
+              <ProtectedRoute>
+                <TitlePage title="Projets">
+                  <JobListing />
+                </TitlePage>
+              </ProtectedRoute>
             }
           />
 

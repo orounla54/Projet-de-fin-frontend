@@ -33,7 +33,7 @@ function TypesTachesFilter() {
   const [toastSuccessOpen, setToastSuccessOpen] = useState(true);
 
   const { data, loading, error, fetchData } = useGetData(
-    `search/typesTaches?keyword=${keyword}`
+    `search/filter/typesTaches?keyword=${keyword}`
   );
 
   useEffect(() => {

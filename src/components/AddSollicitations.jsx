@@ -86,7 +86,7 @@ function AddSollicitations({
       // Envoyer la requête
       if (sollicitation) {
         await axios.put(
-          `${baseUrl}/sollicitations/${sollicitation?.id}`,
+          `${baseUrl}/api/sollicitations/${sollicitation?.id}`,
           baseDataObject,
           {
             headers: {
@@ -96,7 +96,7 @@ function AddSollicitations({
           }
         );
       } else {
-        await axios.post(`${baseUrl}/sollicitations`, baseDataObject, {
+        await axios.post(`${baseUrl}/api/sollicitations`, baseDataObject, {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${accessToken}`,

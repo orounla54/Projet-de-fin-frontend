@@ -63,11 +63,11 @@ function EvenementsSociete() {
   const itemsPerPage = 12;
 
   //get responsable log
-  const {
-    data: responsable,
-    error: responsableError,
-    loading: responsableLoading,
-  } = useGetData("responsables/log");
+  // const {
+  //   data: responsable,
+  //   error: responsableError,
+  //   loading: responsableLoading,
+  // } = useGetData("responsables/log");
 
   const {
     data: categoriesData,
@@ -76,13 +76,13 @@ function EvenementsSociete() {
   } = useGetData("categories/evenements?keyword=");
 
   useEffect(() => {
-    if (responsable && categoriesData) {
-      setResponsableLog(responsable);
+    if (responsableLog && categoriesData) {
+      setResponsableLog(responsableLog);
       setCategories(categoriesData);
       // console.log(responsableLog);
       console.log(categories);
     }
-  }, [responsable, categoriesData]);
+  }, [responsableLog, categoriesData]);
 
   // Construire dynamiquement l'URL en fonction de l'existence de `filter`
   const queryParams = new URLSearchParams({
@@ -141,7 +141,7 @@ function EvenementsSociete() {
     setTotalItems(events.length);
   }, [events]);
 
-  const isLoading = loading || responsableLoading;
+  const isLoading = loading || categoriesLoading;
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
