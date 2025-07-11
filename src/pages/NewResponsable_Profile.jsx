@@ -7,6 +7,7 @@ import ModalBlank from "../components/ModalBlank";
 import { useAuth } from "../utils/Auth/AuthContext";
 import SpinnerLoading from "../components/SpinnerLoading";
 import AuthImage from "../images/pexels-anthonyshkraba-production-8837565.jpg";
+import { baseURL } from '../utils/DataFront/eventTypes';
 
 function NewResponsable_Profile() {
   const navigate = useNavigate();
@@ -59,24 +60,33 @@ function NewResponsable_Profile() {
         });
 
         if (responseS.data && Array.isArray(responseS.data.data)) {
-          console.log('Services valides reçus:', responseS.data.data.length);
           setServices(responseS.data.data);
+        } else if (Array.isArray(responseS.data)) {
+          setServices(responseS.data);
+        } else if (responseS.data && Array.isArray(responseS.data)) {
+          setServices(responseS.data);
         } else {
-          console.warn('Format de données services invalide:', responseS.data);
+          setServices([]);
         }
 
         if (responsePs.data && Array.isArray(responsePs.data.data)) {
-          console.log('Postes valides reçus:', responsePs.data.data.length);
           setPostes(responsePs.data.data);
+        } else if (Array.isArray(responsePs.data)) {
+          setPostes(responsePs.data);
+        } else if (responsePs.data && Array.isArray(responsePs.data)) {
+          setPostes(responsePs.data);
         } else {
-          console.warn('Format de données postes invalide:', responsePs.data);
+          setPostes([]);
         }
 
         if (responsePst.data && Array.isArray(responsePst.data.data)) {
-          console.log('Positions valides reçues:', responsePst.data.data.length);
           setPositions(responsePst.data.data);
+        } else if (Array.isArray(responsePst.data)) {
+          setPositions(responsePst.data);
+        } else if (responsePst.data && Array.isArray(responsePst.data)) {
+          setPositions(responsePst.data);
         } else {
-          console.warn('Format de données positions invalide:', responsePst.data);
+          setPositions([]);
         }
       } catch (err) {
         console.error("Erreur détaillée lors de la récupération des données:", {
@@ -108,7 +118,7 @@ function NewResponsable_Profile() {
     try {
       setLoading(true);
       setMsgErr(""); // Réinitialiser les erreurs
-      const response = await publicAxiosInstance.post('/users/responsable/nouveau', data);
+      const response = await publicAxiosInstance.post(`${baseURL}/users/responsable/nouveau`, data);
       if (response.status === 200 || response.status === 201) {
         const { responsableId, message } = response.data;
         setMessage(message);
@@ -295,7 +305,7 @@ function NewResponsable_Profile() {
                           >
                             <option value="">Sélectionnez...</option>
                             {services.map((service) => (
-                              <option key={service._id} value={service._id}>
+                              <option key={service._id || service.id} value={service._id || service.id}>
                                 {service.nom}
                               </option>
                             ))}
@@ -323,7 +333,7 @@ function NewResponsable_Profile() {
                           >
                             <option value="">Sélectionnez...</option>
                             {postes.map((poste) => (
-                              <option key={poste._id} value={poste._id}>
+                              <option key={poste._id || poste.id} value={poste._id || poste.id}>
                                 {poste.nom}
                               </option>
                             ))}
@@ -352,8 +362,8 @@ function NewResponsable_Profile() {
                             <option value="">Sélectionnez...</option>
                             {positions.map((position) => (
                               <option
-                                key={position._id}
-                                value={position._id}
+                                key={position._id || position.id}
+                                value={position._id || position.id}
                               >
                                 {position.nom}
                               </option>

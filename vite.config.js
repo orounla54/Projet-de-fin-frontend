@@ -29,7 +29,7 @@ export default defineConfig({
   server: {
     proxy: process.env.NODE_ENV === 'development' ? {
       '/api': {
-        target: process.env.VITE_API_URL || 'https://backend-end-1.onrender.com',
+        target: process.env.VITE_API_URL || 'http://localhost:3000',
         changeOrigin: true,
         secure: false
       }

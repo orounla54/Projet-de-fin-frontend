@@ -74,12 +74,13 @@ function AddPreuvesToPriorites({
       const accessToken = AuthService.getAccessToken();
 
       if (preuve) {
-        await axios.put(`${baseUrl}/preuves/${preuve?.id}`, formData, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
+        await axios.put(`${baseUrl}/preuves/${preuve?._id || preuve?.id}`,
+          formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${accessToken}`,
+            },
+          });
       } else {
         const response = await axios.post(
           !docs

@@ -338,7 +338,7 @@ function FormulaireProjets({ projet }) {
               >
                 <option value="">Sélectionner un service</option>
                 {Array.isArray(services) && services.length > 0 ? (
-                  services.map((service) => (
+                  (Array.isArray(services.data) ? services.data : services).map((service) => (
                     <option key={service._id || service.id} value={service._id || service.id}>
                       {service.nom}
                     </option>
@@ -379,7 +379,7 @@ function FormulaireProjets({ projet }) {
               >
                 <option value="">Sélectionner un responsable</option>
                 {Array.isArray(users) && users.length > 0 ? (
-                  users.map((user) => (
+                  (Array.isArray(users.data) ? users.data : users).map((user) => (
                     <option key={user._id || user.id} value={user._id || user.id}>
                       {user.nom} {user.prenom}
                     </option>

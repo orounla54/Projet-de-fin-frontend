@@ -191,17 +191,21 @@ function FormulaireTaches({ tache }) {
   //chargement des selects
   useEffect(() => {
     if (projetsData) {
-      setProjets(projetsData);
+      const projetsList = Array.isArray(projetsData) ? projetsData : projetsData.data || [];
+      setProjets(projetsList);
     }
     if (responsablesData) {
-      setResponsables(responsablesData);
+      const responsablesList = Array.isArray(responsablesData) ? responsablesData : responsablesData.data || [];
+      setResponsables(responsablesList);
     }
     if (servicesData) {
-      setServices(servicesData);
-      setServiceSelectId(servicesData?.[0]?.id);
+      const servicesList = Array.isArray(servicesData) ? servicesData : servicesData.data || [];
+      setServices(servicesList);
+      setServiceSelectId(servicesList?.[0]?._id || servicesList?.[0]?.id);
     }
     if (typesTachesData) {
-      setTypesTaches(typesTachesData);
+      const typesTachesList = Array.isArray(typesTachesData) ? typesTachesData : typesTachesData.data || [];
+      setTypesTaches(typesTachesList);
     }
   }, [projetsData, responsablesData, typesTachesData, servicesData]);
 
@@ -383,7 +387,7 @@ function FormulaireTaches({ tache }) {
                 >
                   <option value="">-- Sélectionnez un type de tâche --</option>
                   {typesTaches?.length > 0 && typesTaches?.map((type) => (
-                    <option key={type.id} value={type.id}>
+                    <option key={type._id || type.id} value={type._id || type.id}>
                       {type.libelle}
                     </option>
                   ))}
@@ -452,7 +456,7 @@ function FormulaireTaches({ tache }) {
                   }
                 >
                   {responsables.map((responsable) => (
-                    <option key={responsable.id} value={`${responsable.id}`}>
+                    <option key={responsable._id || responsable.id} value={`${responsable._id || responsable.id}`}>
                       {responsable.nom} {responsable.prenom}
                     </option>
                   ))}
@@ -478,8 +482,8 @@ function FormulaireTaches({ tache }) {
                   }}
                 >
                   {services.map((service) => (
-                    <option key={service.id} value={service.id}>
-                      {service.libelle}
+                    <option key={service._id || service.id} value={service._id || service.id}>
+                      {service.libelle || service.nom}
                     </option>
                   ))}
                 </select>
@@ -506,7 +510,7 @@ function FormulaireTaches({ tache }) {
                   onChange={(e) => handleSelectChange(e)}
                 >
                   {responsablesAutre.map((responsable) => (
-                    <option key={responsable.id} value={responsable.id}>
+                    <option key={responsable._id || responsable.id} value={responsable._id || responsable.id}>
                       {responsable.nom} {responsable.prenom}
                     </option>
                   ))}
@@ -644,7 +648,7 @@ function FormulaireTaches({ tache }) {
                 >
                   <option value="">-- Sélectionnez le projet --</option>
                   {projets.map((projet) => (
-                    <option key={projet.id} value={projet.id}>
+                    <option key={projet._id || projet.id} value={projet._id || projet.id}>
                       {projet.libelle && projet.libelle.length > 40
                         ? `${projet.libelle.slice(0, 40)}...`
                         : projet.libelle}

@@ -63,12 +63,12 @@ function ResponsableTacheItem({
       </div>
       <div className="absolute -top-1 -left-2">
         {hoveredIndex === index &&
-          responsable.id !==  parseInt(tache.Responsable_Prin, 10) &&
+          (responsable._id || responsable.id) !==  parseInt(tache.Responsable_Prin, 10) &&
           responsableLog?.id === parseInt( parseInt(tache.Responsable_Prin, 10)) && (
             <DangerModal
               endpoint="responsable_deleteTache"
               refreshList={fetchTache}
-              idObjet={responsable.id}
+              idObjet={responsable._id || responsable.id}
               tache={tache}
               libelleObjet={responsable.nom + " " + responsable.prenom}
             />

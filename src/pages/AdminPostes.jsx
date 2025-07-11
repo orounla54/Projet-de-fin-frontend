@@ -46,9 +46,11 @@ function AdminPostes() {
 
   useEffect(() => {
     if (data) {
-      setPostes(data);
-      setPosteCurrentIdInfo(postes[0]?.id);
-      console.log(postes);
+      // Si la réponse est un objet avec data, on prend data.data, sinon data
+      const postesList = Array.isArray(data) ? data : data.data || [];
+      setPostes(postesList);
+      setPosteCurrentIdInfo(postesList[0]?._id || postesList[0]?.id);
+      console.log(postesList);
       console.log(posteCurrentIdInfo);
     }
   }, [data]);

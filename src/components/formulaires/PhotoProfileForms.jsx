@@ -42,6 +42,7 @@ function PhotoProfileForms({fetchData, setFeedbackModalOpen, feedbackModalOpen, 
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "multipart/form-data",
           },
         }
       );

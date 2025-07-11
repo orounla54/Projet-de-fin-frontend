@@ -42,9 +42,9 @@ function ResetPassword({ feedbackModalOpen, setFeedbackModalOpen }) {
     } catch (error) {
       // Gère les erreurs et affiche le message approprié
       const errorMessage =
-        error.response && error.response.data
-          ? error.response.data.message // Message d'erreur spécifique renvoyé par le serveur
-          : "Erreur inattendue lors de la mise à jour du mot de passe. ";
+        error.response?.data?.message ||
+        error.message ||
+        "Erreur inattendue lors de la mise à jour du mot de passe. ";
 
       setErrorUpdatePassword(errorMessage);
     } finally {

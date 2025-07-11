@@ -201,7 +201,7 @@ function AddRespForTache({ tache, fetchTache, responsablesActu }) {
                   }`}
                 >
                   {responsables.map((responsable) => (
-                    <option key={responsable.id} value={responsable.id}>
+                    <option key={responsable._id || responsable.id} value={responsable._id || responsable.id}>
                       {responsable.nom} {responsable.prenom}
                     </option>
                   ))}

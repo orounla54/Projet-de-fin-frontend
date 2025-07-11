@@ -76,7 +76,7 @@ const API_ENDPOINTS = {
         BASE: `${baseURL}/responsables`,
         FILTER: `${baseURL}/filter/responsables`,
         CURRENT: `${baseURL}/responsables/log`,
-        NEW: `${baseURL}/responsables/nouveau`
+        NEW: `${baseURL}/users/responsable/nouveau`
     },
 
     // Discussions

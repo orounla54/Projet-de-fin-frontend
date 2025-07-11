@@ -34,7 +34,7 @@ function FormulaireTypeTaches() {
       setSuccessMessage("Type Tâche enregistrée avec succès !")
       navigate(-1);
     } catch (error) {
-      setMsgError("Erreur lors de la création du type tache.");
+      setMsgError(error.response?.data?.message || "Erreur lors de la création du type tache.");
     }
   };
 
