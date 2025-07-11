@@ -2,13 +2,13 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 
 //baseUrl
-export const baseURL = import.meta.env.VITE_BASE_URL_BACKEND || 'https://backend-end-1.onrender.com';
+export const baseURL = import.meta.env.VITE_BASE_URL_BACKEND || 'https://backend-end-1.onrender.com/api';
 
 //export const baseURL = (import.meta.env.VITE_BASE_URL_BACKEND || 'http://localhost:5000');
 
-export const baseUrlInvitations = import.meta.env.VITE_BASE_URL_BACKEND || 'https://backend-end-1.onrender.com';
+export const baseUrlInvitations = import.meta.env.VITE_BASE_URL_BACKEND || 'https://backend-end-1.onrender.com/api/invitations';
 
-export const socketBaseURL = import.meta.env.VITE_BASE_URL_SOCKET || 'https://backend-end-1.onrender.com';
+export const socketBaseURL = import.meta.env.VITE_BASE_URL_SOCKET || 'https://backend-end-1.onrender.com/api';
 
 
 
