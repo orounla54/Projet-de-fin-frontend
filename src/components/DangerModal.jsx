@@ -5,11 +5,11 @@ import { useDeleteData } from "../utils/Requests/RequestService";
 import { useSuccessMessage } from "../utils/SuccessContext";
 import SpinnerLoading from "./SpinnerLoading";
 import { useNavigate } from "react-router-dom";
-import { io } from "socket.io-client";
-import { socketBaseURL } from "../utils/DataFront/eventTypes";
+// import { io } from "socket.io-client";
+// import { socketBaseURL } from "../utils/DataFront/eventTypes";
 
 function DangerModal(props) {
-  const socket = io(socketBaseURL);
+  // const socket = io(socketBaseURL);
   const [dangerModalOpen, setDangerModalOpen] = useState(false);
   const [endpoint, setEndpoint] = useState("");
   const navigate = useNavigate();
@@ -144,7 +144,7 @@ function DangerModal(props) {
       }
 
       if (props.endpoint === "messages" || props.endpoint === "medias") {
-        socket.emit("deleteMessage", props.discussionCurrent);
+        // socket.emit("deleteMessage", props.discussionCurrent);
       }
     } catch (error) {
       console.error("Erreur lors de la suppression :", error);
