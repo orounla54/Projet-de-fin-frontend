@@ -291,14 +291,14 @@ function IndicateurDP() {
     data: dataTask,
     error: taskError,
     loading: taskLoading,
-  } = useGetData(`api/stats/indicateurDP/responsable?${queryParams}`);
+  } = useGetData(`/stats/indicateurDP/responsable?${queryParams}`);
 
   //get Tache for IDP
   const {
     data: dataTaskContribution,
     error: taskContributionError,
     loading: taskContributionLoading,
-  } = useGetData(`api/stats/indicateurDP/contributeur?${queryParams}`);
+  } = useGetData(`/stats/indicateurDP/contributeur?${queryParams}`);
 
   //get all taches
   useEffect(() => {

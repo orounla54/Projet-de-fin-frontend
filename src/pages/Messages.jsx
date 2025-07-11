@@ -54,7 +54,7 @@ function Messages() {
     loading: DiscussionsLoading,
     error: DiscussionsError,
     fetchData: fetchDiscussions,
-  } = useGetData(`api/discussions?keyword=${keyword}`);
+  } = useGetData(`/discussions?keyword=${keyword}`);
 
   //get discussion current
   const {
@@ -62,7 +62,7 @@ function Messages() {
     loading: DiscussionsCurrentLoading,
     error: DiscussionsCurrentError,
     fetchData: fetchDiscussionCurrent,
-  } = useGetData(id ? `api/discussions/${parseInt(id)}` : "");
+  } = useGetData(id ? `/discussions/${parseInt(id)}` : "");
 
   //get medias discussion current
   const {
@@ -70,7 +70,7 @@ function Messages() {
     loading: mediasDiscussionsCurrentLoading,
     error: mediasDiscussionsCurrentError,
     fetchData: mediasFetchDiscussionCurrent,
-  } = useGetData(id ? `api/discussions/mediaDiscu/${parseInt(id)}` : "");
+  } = useGetData(id ? `/discussions/mediaDiscu/${parseInt(id)}` : "");
 
   useEffect(() => {
     if (DiscussionsData) {

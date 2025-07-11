@@ -47,7 +47,7 @@ function TypeTacheItem(props) {
         <div className="space-x-1 flex items-center justify-center">
           <DangerModal
             refreshList={props.refreshList}
-            endpoint="api/typesTaches/filter"
+            endpoint="/typesTaches/filter"
             idObjet={props.id}
             libelleObjet={props.libelle}
           />

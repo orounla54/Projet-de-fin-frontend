@@ -6,7 +6,7 @@ const AuthService = {
     login: async (data) => {
         try {
             console.log('Tentative de connexion avec:', { email: data.email });
-            const response = await axios.post(`${baseURL}/api/auth/login`, {
+            const response = await axios.post(`${baseURL}/auth/login`, {
                 email: data.email,
                 password: data.password
             });
@@ -31,7 +31,7 @@ const AuthService = {
         try {
             const token = localStorage.getItem('accessToken');
             if (token) {
-                await axios.post(`${baseURL}/api/auth/logout`, {}, {
+                await axios.post(`${baseURL}/auth/logout`, {}, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
             }
@@ -53,7 +53,7 @@ const AuthService = {
                 return { isAuthenticated: false };
             }
 
-            const response = await axios.get(`${baseURL}/api/auth/me`, {
+            const response = await axios.get(`${baseURL}/auth/me`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -98,7 +98,7 @@ const AuthService = {
     updateProfile: async (userData) => {
         try {
             const token = localStorage.getItem('accessToken');
-            const response = await axios.put(`${baseURL}/api/users/profile`, userData, {
+            const response = await axios.put(`${baseURL}/users/profile`, userData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             return { success: true, user: response.data };
@@ -113,7 +113,7 @@ const AuthService = {
     // Inscription
     register: async (userData) => {
         try {
-            const response = await axios.post(`${baseURL}/api/auth/register`, userData);
+            const response = await axios.post(`${baseURL}/auth/register`, userData);
             return { success: true, data: response.data };
         } catch (error) {
             return { 
@@ -126,7 +126,7 @@ const AuthService = {
     // Validation du compte
     validateAccount: async (email, code) => {
         try {
-            const response = await axios.post(`${baseURL}/api/auth/verify-email`, {
+            const response = await axios.post(`${baseURL}/auth/verify-email`, {
                 email,
                 code
             });
@@ -142,7 +142,7 @@ const AuthService = {
     // Réinitialisation du mot de passe
     resetPassword: async (email) => {
         try {
-            const response = await axios.post(`${baseURL}/api/auth/forgot-password`, { email });
+            const response = await axios.post(`${baseURL}/auth/forgot-password`, { email });
             return { success: true, data: response.data };
         } catch (error) {
             return { 

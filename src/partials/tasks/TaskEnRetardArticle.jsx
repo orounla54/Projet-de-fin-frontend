@@ -64,7 +64,7 @@ function TaskEnRetardArticle({ tache }) {
     loading: imagesTacheLoading,
     error: imagesTacheError,
     fetchData: fetchDataIMG,
-  } = useGetData(`api/taches/ImgsTache/${tache.id}`);
+  } = useGetData(`/taches/ImgsTache/${tache.id}`);
 
   useEffect(() => {
     if (imagesTache) {

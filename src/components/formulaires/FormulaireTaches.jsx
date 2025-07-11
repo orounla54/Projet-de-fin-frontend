@@ -160,28 +160,28 @@ function FormulaireTaches({ tache }) {
     data: projetsData,
     loading: projetsLoading,
     error: projetsError,
-  } = useGetData(`/api/projets/public`);
+  } = useGetData(`/projets/public`);
 
   const {
     data: responsablesData,
     loading: responsablesLoading,
     error: responsablesError,
-  } = useGetData(`/api/users/actifs`);
+  } = useGetData(`/users/actifs`);
 
   const {
     data: servicesData,
     loading: servicesLoading,
     error: servicesError,
-  } = useGetData(`/api/services/forUpdate`);
+  } = useGetData(`/services/forUpdate`);
 
   const {
     data: typesTachesData,
     loading: typesTachesLoading,
     error: typesTachesError,
-  } = useGetData(`/api/typesTaches/filter`);
+  } = useGetData(`/typesTaches/filter`);
 
   // Pour la recherche dynamique de responsables, utiliser aussi /api/users/actifs
-  const { data: responsablesAutreData, loading: loadingRespAutre, error: errorRespAutre } = useGetData(`/api/users/actifs`);
+  const { data: responsablesAutreData, loading: loadingRespAutre, error: errorRespAutre } = useGetData(`/users/actifs`);
   useEffect(() => {
     if (responsablesAutreData) {
       setResponsablesAutre(responsablesAutreData);

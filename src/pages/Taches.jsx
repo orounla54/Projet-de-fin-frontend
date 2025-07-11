@@ -74,7 +74,7 @@ function Taches() {
     loading,
     error,
     fetchData: fetchDataListe,
-  } = useGetData(`api/taches/getAllforResp?${activeEndpoint}`);
+  } = useGetData(`/taches/getAllforResp?${activeEndpoint}`);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -91,7 +91,7 @@ function Taches() {
     loading: tacheLoading,
     error: tacheErr,
     fetchData: fetchDataTacheView,
-  } = useGetData(itemClicked ? `api/taches/${itemClicked}` : "");
+  } = useGetData(itemClicked ? `/taches/${itemClicked}` : "");
 
   useEffect(() => {
     if (tache && Object.keys(tache).length > 0) {
@@ -138,7 +138,7 @@ function Taches() {
     error: errorUpdate,
     loading: loadingUpdate,
     putData,
-  } = usePutData(`api/taches/${tacheSelected.id}`);
+  } = usePutData(`/taches/${tacheSelected.id}`);
 
   const handleUpdateState = async (contexte) => {
     // Création d'un objet pour la mise à jour dynamique

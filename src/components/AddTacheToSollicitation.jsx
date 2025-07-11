@@ -167,26 +167,26 @@ function AddTacheToSollicitation({
     data: servicesData,
     loading: servicesLoading,
     error: servicesError,
-  } = useGetData(`/api/services/forUpdate`);
+  } = useGetData(`/services/forUpdate`);
 
   // Met à jour les etats
   const {
     data: projetsData,
     loading: projetsLoading,
     error: projetsError,
-  } = useGetData(`/api/projets/public`);
+  } = useGetData(`/projets/public`);
 
   const {
     data: responsablesData,
     loading: responsablesLoading,
     error: responsablesError,
-  } = useGetData(`/api/users/actifs`);
+  } = useGetData(`/users/actifs`);
 
   const {
     data: typesTachesData,
     loading: typesTachesLoading,
     error: typesTachesError,
-  } = useGetData(`/api/typesTaches/filter`);
+  } = useGetData(`/typesTaches/filter`);
 
   //chargement des selects
   useEffect(() => {

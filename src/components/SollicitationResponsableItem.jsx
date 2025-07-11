@@ -51,7 +51,7 @@ function SollicitationResponsableItem({ sollicitation, fetchData }) {
 
       const accessToken = AuthService.getAccessToken();
       await axios.put(
-        `${baseUrl}/api/sollicitations/${sollicitation?.id}`,
+        `${baseUrl}/sollicitations/${sollicitation?.id}`,
         objetStatusSatisfaction,
         {
           headers: {
@@ -91,7 +91,7 @@ function SollicitationResponsableItem({ sollicitation, fetchData }) {
 
       const accessToken = AuthService.getAccessToken();
       await axios.put(
-        `${baseUrl}/api/sollicitations/${sollicitation?.id}`,
+        `${baseUrl}/sollicitations/${sollicitation?.id}`,
         objetStatusSatisfaction,
         {
           headers: {

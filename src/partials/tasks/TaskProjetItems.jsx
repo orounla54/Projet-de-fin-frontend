@@ -56,7 +56,7 @@ function TaskProjetItems({ tache }) {
     }
   }, [tache]);
   //get imgs tache
-  const { data: imagesTache } = useGetData(`api/taches/ImgsTache/${tache.id}`);
+  const { data: imagesTache } = useGetData(`/taches/ImgsTache/${tache.id}`);
 
   useEffect(() => {
     if (imagesTache) {

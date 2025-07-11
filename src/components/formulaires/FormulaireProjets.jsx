@@ -17,7 +17,7 @@ function FormulaireProjets({ projet }) {
     loading: usersLoading,
     error: usersError,
     fetchData: fetchUsers,
-  } = useGetData("/api/users/actifs");
+  } = useGetData("/users/actifs");
 
   // Récupération des services
   const {
@@ -25,7 +25,7 @@ function FormulaireProjets({ projet }) {
     loading: servicesLoading,
     error: servicesError,
     fetchData: fetchServices,
-  } = useGetData("/api/services/forUpdate");
+  } = useGetData("/services/forUpdate");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -57,14 +57,14 @@ function FormulaireProjets({ projet }) {
     error: postError,
     loading: postLoading,
     postData,
-  } = usePostData(`/api/projets/public`);
+  } = usePostData(`/projets/public`);
 
   const {
     response: putResponse,
     error: putError,
     loading: putLoading,
     putData,
-  } = usePutData(`/api/projets/${projet.id}`);
+  } = usePutData(`/projets/${projet.id}`);
 
   const methods = useForm({
     defaultValues: {
@@ -373,82 +373,4 @@ function FormulaireProjets({ projet }) {
                 {...methods.register("responsable", {
                   required: "Le responsable est requis",
                 })}
-                className={`form-select w-full ${
-                  methods.formState.errors.responsable ? "border border-red-500" : ""
-                }`}
-              >
-                <option value="">Sélectionner un responsable</option>
-                {Array.isArray(users) && users.length > 0 ? (
-                  (Array.isArray(users.data) ? users.data : users).map((user) => (
-                    <option key={user._id || user.id} value={user._id || user.id}>
-                      {user.nom} {user.prenom}
-                    </option>
-                  ))
-                ) : (
-                  <option value="" disabled>
-                    Aucun utilisateur disponible
-                  </option>
-                )}
-              </select>
-              {methods.formState.errors.responsable && (
-                <p className="text-red-500 text-xs absolute -bottom-5 left-0">
-                  {methods.formState.errors.responsable.message}
-                </p>
-              )}
-              {usersError && (
-                <p className="text-red-500 text-xs mt-1">
-                  Erreur lors du chargement des utilisateurs
-                </p>
-              )}
-            </div>
-
-            {/* Statut */}
-            <div className="mb-5">
-              <label
-                htmlFor="statut"
-                className="block text-sm font-medium mb-1"
-              >
-                Statut <span className="text-red-500">*</span>
-              </label>
-              <select
-                {...methods.register("statut", {
-                  required: "Le statut est requis",
-                })}
-                className={`form-select w-full ${
-                  methods.formState.errors.statut ? "border border-red-500" : ""
-                }`}
-              >
-                <option value="planifié">Planifié</option>
-                <option value="en cours">En cours</option>
-                <option value="terminé">Terminé</option>
-                <option value="suspendu">Suspendu</option>
-                <option value="annulé">Annulé</option>
-              </select>
-              {methods.formState.errors.statut && (
-                <p className="text-red-500 text-xs absolute -bottom-5 left-0">
-                  {methods.formState.errors.statut.message}
-                </p>
-              )}
-            </div>
-
-            {/* Bouton de soumission */}
-            <div className="flex justify-end mt-6">
-              <button
-                type="submit"
-                className="btn bg-indigo-500 hover:bg-indigo-600 text-white"
-              >
-                {projetExiste ? "Modifier" : "Créer"} le projet
-              </button>
-            </div>
-
-            {msgError && (
-              <div className="text-red-500 text-sm mt-2">{msgError}</div>
-            )}
-          </div>
-        </form>
-      )}
-    </FormProvider>
-  );
-}
-
-export default FormulaireProjets;
+                className={`

@@ -60,7 +60,7 @@ function ProjetsFiltre() {
 
   // Récupérer les données avec les paramètres de filtre conditionnels
   const { data, loading, error, fetchData } = useGetData(
-    queryParams ? `/api/projets/public?${queryParams}` : "/api/projets/public"
+    queryParams ? `/projets/public?${queryParams}` : "/projets/public"
   );
 
   // console.log(filter);
@@ -98,7 +98,7 @@ function ProjetsFiltre() {
 
   // Fonction pour supprimer les éléments sélectionnés
   const [deleteAllLoading, setDeleteAllLoading] = useState(false);
-  const { deleteData: deleteProjet } = useDeleteData('/api/projets');
+  const { deleteData: deleteProjet } = useDeleteData('/projets');
 
   const deleteAll = async (selectedItems) => {
     setDeleteAllLoading(true);
