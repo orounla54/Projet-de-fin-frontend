@@ -48,9 +48,9 @@ function NewResponsable_Profile() {
         });
 
         const [responseS, responsePs, responsePst] = await Promise.all([
-          publicAxiosInstance.get('/services/public'),
-          publicAxiosInstance.get('/postes/public'),
-          publicAxiosInstance.get('/positions/public')
+          publicAxiosInstance.get('/api/services/public'),
+          publicAxiosInstance.get('/api/postes/public'),
+          publicAxiosInstance.get('/api/positions/public')
         ]);
 
         console.log('Réponses reçues:', {
